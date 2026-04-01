@@ -1,0 +1,19 @@
+/* Global CSS overrides for React Navigation Web */
+
+/* Remove all background boxes from tab navigation buttons */
+button[role="tab"],
+button[role="tab"]:hover,
+button[role="tab"]:focus,
+button[role="tab"]:active,
+button[role="tab"]:focus-visible {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Remove any default webkit/browser button styles */
+button[role="tab"]::-moz-focus-inner {
+  border: 0 !important;
+}

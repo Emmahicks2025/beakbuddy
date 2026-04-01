@@ -5,7 +5,7 @@
     "scheme": "beakbuddy",
     "version": "1.2.8",
     "orientation": "portrait",
-    "icon": "./logo-png.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",

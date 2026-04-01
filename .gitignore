@@ -11,3 +11,8 @@ npm-debug.*
 web-build/
 .DS_Store
 *.log
+
+# Native folders
+/android
+/ios/*
+!/ios/ci_scripts

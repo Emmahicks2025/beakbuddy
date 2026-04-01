@@ -19,14 +19,22 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
-
-      - name: Build IPA locally
-        run: EXPO_NO_TELEMETRY=1 npx eas build --platform ios --profile production --local --non-interactive --output=./beakbuddy.ipa
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Setup Ruby and Fastlane
+        uses: ruby/setup-ruby@v1
         with:
-          name: beakbuddy-ipa
-          path: ./beakbuddy.ipa
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Generate Native iOS Code (Expo Prebuild)
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Build & Upload to TestFlight
+        run: fastlane ios beta
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+

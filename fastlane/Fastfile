@@ -1,0 +1,37 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and Upload to TestFlight natively without Expo"
+  lane :beta do
+    # 1. Authenticate with Apple App Store Connect API
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_content: ENV["APP_STORE_CONNECT_PRIVATE_KEY"],
+      is_key_content_base64: true,
+      in_house: false
+    )
+
+    # 2. Sync certificates and provisioning profiles
+    # cert and sigh will create them if missing, and download if exist.
+    cert(api_key: api_key)
+    sigh(api_key: api_key, app_identifier: "com.beakbuddy.app")
+
+    # 3. Build the native iOS app
+    build_app(
+      workspace: "ios/beakbuddy.xcworkspace",
+      scheme: "beakbuddy",
+      export_method: "app-store",
+      export_options: {
+        signingStyle: "manual"
+      }
+    )
+
+    # 4. Upload to TestFlight
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+      app_identifier: "com.beakbuddy.app"
+    )
+  end
+end

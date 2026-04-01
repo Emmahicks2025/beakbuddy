@@ -1,4 +1,5 @@
-name: Build iOS IPA
+name: Build iOS (TestFlight)
+
 on:
   push:
     branches: [ main ]
@@ -6,7 +7,21 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-15
+    env:
+      EXPO_PUBLIC_GEMINI_API_KEY: ${{ secrets.EXPO_PUBLIC_GEMINI_API_KEY }}
+      EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
+      EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: beakbuddy-march2026.firebaseapp.com
+      EXPO_PUBLIC_FIREBASE_PROJECT_ID: beakbuddy-march2026
+      EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: beakbuddy-march2026.firebasestorage.app
+      EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: 15460675966
+      EXPO_PUBLIC_FIREBASE_APP_ID: 1:15460675966:ios:4ae864e4d28804daf6c32f
+      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: 15460675966-im687q15ek2baoshkhlo3kbel63jttaf.apps.googleusercontent.com
+      EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: 15460675966-v6re102t627f123n3c754h6p6t2252p2.apps.googleusercontent.com
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -15,17 +30,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install
 
-      - name: Generate Native iOS Code (Expo Prebuild)
-        run: EXPO_NO_TELEMETRY=1 CI=1 npx --yes expo@~52.0.0 prebuild --platform ios --clean
+      - name: Setup Fastlane
+        run: brew install fastlane
 
-      - name: Build & Upload to TestFlight
+      - name: Expo Prebuild
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Run Fastlane Beta
         run: fastlane ios beta
-        env:
-          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
-

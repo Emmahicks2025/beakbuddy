@@ -20,7 +20,7 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Generate Native iOS Code (Expo Prebuild)
-        run: EXPO_NO_TELEMETRY=1 CI=1 npm run prebuild
+        run: EXPO_NO_TELEMETRY=1 CI=1 npx --yes expo@~52.0.0 prebuild --platform ios --clean
 
       - name: Build & Upload to TestFlight
         run: fastlane ios beta

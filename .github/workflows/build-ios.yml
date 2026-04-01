@@ -16,20 +16,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Setup Ruby and Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0'
-          bundler-cache: true
-
-      - name: Install Fastlane
-        run: gem install fastlane
-
       - name: Generate Native iOS Code (Expo Prebuild)
-        run: EXPO_NO_TELEMETRY=1 CI=1 npx --yes expo prebuild --platform ios --clean
+        run: |
+          npm install --legacy-peer-deps
+          EXPO_NO_TELEMETRY=1 CI=1 npx --yes expo prebuild --platform ios --clean
 
       - name: Build & Upload to TestFlight
         run: fastlane ios beta

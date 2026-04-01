@@ -28,7 +28,7 @@ jobs:
 
       - name: Build IPA
         run: |
-          npx eas build --platform ios --profile production --non-interactive --local --output=./beakbuddy.ipa
+          npx eas build --platform ios --profile production --non-interactive --output=./beakbuddy.ipa
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 

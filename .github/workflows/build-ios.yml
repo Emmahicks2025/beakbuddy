@@ -1,4 +1,4 @@
-name: Build iOS (TestFlight)
+name: Build iOS (TestFlight) 🚀
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: [self-hosted, macOS]
     env:
       EXPO_PUBLIC_GEMINI_API_KEY: ${{ secrets.EXPO_PUBLIC_GEMINI_API_KEY }}
       EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
@@ -32,21 +32,15 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install JS dependencies
         run: npm install
 
-      - name: Setup Fastlane
-        run: brew install fastlane
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.app
-
-      - name: Expo Prebuild
+      - name: Expo Prebuild (generate native iOS project)
         run: npx expo prebuild --platform ios --no-install
 
       - name: Install CocoaPods dependencies
         working-directory: ios
         run: pod install
 
-      - name: Run Fastlane Beta
+      - name: Run Fastlane Beta → Build & Upload to TestFlight
         run: fastlane ios beta

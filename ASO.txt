@@ -1,0 +1,25 @@
+BeakBuddy: Parrot Training AI
+
+AI behavior coach for screaming, plucking & parrot training.
+
+
+
+The world’s first AI-powered coach designed specifically for your parrot. 🦜
+
+Stop biting and screaming while mastering potty training, speech, and recall with personalized behavior analysis. Track avian health, meal timings, and diet logs to ensure your bird lives a long, happy, and healthy life.
+
+Why BeakBuddy? Most bird apps are just soundboards. BeakBuddy uses AI to understand your parrot's unique needs, helping you build a deeper bond through science-based training.
+
+3. Key Features List
+Use these bullet points in your "Description" section to explain the app's value.
+
+✨ AI-Powered Training: Step-by-step guides for potty training, recall, and trick training. 🗣️ Speech Coach: Tools to help your parrot mimic words and phrases effectively. 🥗 Health & Diet Tracker: Log meals, track weight, and monitor nutrition for a balanced diet. 📉 Behavior Analysis: Solve common issues like feather plucking, screaming, and biting. ⏰ Smart Reminders: Never miss a feeding or a training session with custom alerts. 📅 Activity Logs: Keep a digital diary of your bird’s progress and milestones.
+
+
+
+
+
+Priority,Keywords,Why?
+High,"Cockatiel, Conure, African Grey, Macaw",People search for their specific bird species.
+Medium,"Clicker, Whistle, Mimic, Tracker",These are functional words that describe how they use the app.
+Growth,"Vet, Diet, Nutrition, Pellets","Captures the ""Health & Wellness"" segment of pet owners."

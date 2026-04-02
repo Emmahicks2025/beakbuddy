@@ -38,8 +38,15 @@ jobs:
       - name: Setup Fastlane
         run: brew install fastlane
 
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app
+
       - name: Expo Prebuild
         run: npx expo prebuild --platform ios --no-install
+
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: pod install
 
       - name: Run Fastlane Beta
         run: fastlane ios beta

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeakBuddy Pro Paywall</title>
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --safe: #10B981;
+            --background: #F8FAFC;
+            --text: #0F172A;
+            --text-secondary: #64748B;
+            --surface: rgba(255, 255, 255, 0.7);
+            --border: rgba(203, 213, 225, 0.5);
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            /* Adjusted for iPhone aspect ratio */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+            text-align: center;
+        }
+
+        .header-card h1 {
+            font-size: 34px;
+            margin: 0 0 8px 0;
+            color: var(--primary);
+        }
+
+        .header-card p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .trial-banner {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--safe);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .trial-banner h3 {
+            font-size: 20px;
+            color: var(--safe);
+            margin: 0;
+        }
+
+        .trial-banner p {
+            font-size: 15px;
+            margin: 4px 0 0 0;
+        }
+
+        .features-card {
+            text-align: left;
+        }
+
+        .features-card h3 {
+            font-size: 20px;
+            margin: 0 0 16px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 17px;
+        }
+
+        .feature-icon {
+            font-size: 20px;
+            width: 28px;
+        }
+
+        .cta-card {
+            background-color: var(--primary);
+            color: white;
+            padding: 24px;
+        }
+
+        .cta-card h2 {
+            font-size: 28px;
+            margin: 0 0 8px 0;
+        }
+
+        .cta-card p {
+            font-size: 17px;
+            margin: 0 0 20px 0;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            background-color: white;
+            color: var(--primary);
+            border: none;
+            border-radius: 28px;
+            padding: 16px 32px;
+            font-size: 17px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .tier-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .tier-card.selected {
+            border: 2px solid var(--primary);
+        }
+
+        .tier-info h4 {
+            font-size: 17px;
+            margin: 0;
+        }
+
+        .tier-info p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .savings-badge {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--safe);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        .checkmark {
+            background-color: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .legal {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 24px;
+            padding-bottom: 48px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card header-card">
+            <h1>BeakBuddy Pro 🦜</h1>
+            <p>Unlock unlimited AI-powered parrot care</p>
+        </div>
+
+        <div class="trial-banner">
+            <h3>✨ 7-Day Free Trial</h3>
+            <p>Cancel anytime during trial period</p>
+        </div>
+
+        <div class="card features-card">
+            <h3>Pro Features</h3>
+            <div class="feature-item"><span class="feature-icon">🤖</span><span>Unlimited AI Food Analysis</span></div>
+            <div class="feature-item"><span class="feature-icon">📸</span><span>Visual Food Recognition</span></div>
+            <div class="feature-item"><span class="feature-icon">💬</span><span>AI Chat Assistant</span></div>
+            <div class="feature-item"><span class="feature-icon">🎯</span><span>Personalized Training Plans</span></div>
+            <div class="feature-item"><span class="feature-icon">📊</span><span>Advanced Analytics</span></div>
+            <div class="feature-item"><span class="feature-icon">🔔</span><span>Priority Support</span></div>
+        </div>
+
+        <div class="card cta-card">
+            <h2>🎉 Start Your Free Trial</h2>
+            <p>7 days free, then $39.99/year</p>
+            <button class="cta-button">Start Free Trial Now &rarr;</button>
+            <p style="margin-top: 12px; font-size: 15px; border-bottom: none; opacity: 0.8;">Cancel anytime. No
+                commitment required.</p>
+        </div>
+
+        <p style="text-align: center; font-size: 15px; color: var(--text-secondary); margin: 20px 0;">Or choose a
+            different plan:</p>
+
+        <div class="card tier-card">
+            <div class="tier-info">
+                <h4>Monthly</h4>
+                <p>$4.99/month</p>
+            </div>
+        </div>
+
+        <div class="card tier-card selected">
+            <div class="tier-info">
+                <h4>Yearly</h4>
+                <p>$39.99/year</p>
+                <div class="savings-badge">Save 33%</div>
+            </div>
+            <div class="checkmark">✓</div>
+        </div>
+
+        <div class="legal">
+            Subscription will automatically renew unless canceled at least 24 hours before the end of the current
+            period. Final price may vary by location.
+        </div>
+    </div>
+</body>
+
+</html>

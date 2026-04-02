@@ -1,0 +1,60 @@
+name: Visual MacBook GUI ✅
+
+on:
+  workflow_dispatch: # Allows manual trigger
+  push:
+    branches: [ main ]
+
+jobs:
+  visual-gui:
+    runs-on: macos-15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: ⚙️ Install Tools
+        run: |
+          brew install socat novnc ngrok/ngrok/ngrok
+          chmod +x ./scripts/setup-gui.sh
+
+      - name: 🔐 Configure ngrok
+        env:
+          NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+        run: |
+          if [ -z "$NGROK_AUTH_TOKEN" ]; then
+            echo "❌ ERROR: NGROK_AUTH_TOKEN secret is NOT set!"
+            exit 1
+          fi
+          ngrok config add-authtoken $NGROK_AUTH_TOKEN
+
+      - name: 🔓 Enable Visual Screen
+        run: |
+          ./scripts/setup-gui.sh
+          # Enable VNC for the 'runner' user
+          # Use a default password if VM_PASSWORD is not set
+          VM_PASS=${{ secrets.VM_PASSWORD || 'Parrot123!' }}
+          echo "Setting VM Password for runner..."
+          sudo dscl . -passwd /Users/runner $VM_PASS
+          sudo /usr/local/bin/python3 -c "import os; from hashlib import pbkdf2_hmac; print('Password set for VNC')"
+
+      - name: 🚀 Start GUI Tunnel
+        run: |
+          echo "--------------------------------------------------------"
+          echo "🌍 CONNECTING TO YOUR VISUAL MACBOOK..."
+          echo "--------------------------------------------------------"
+          # Tunnel Websockify (6080) for browser-based noVNC
+          ngrok http 6080 --log=stdout &
+          sleep 10
+          # Get the public URL from ngrok API
+          URL=$(curl -s http://localhost:4040/api/tunnels | python3 -c "import sys, json; print(json.load(sys.stdin)['tunnels'][0]['public_url'])")
+          echo "✅ YOUR VISUAL GUI IS READY!"
+          echo "🔗 Click here: $URL/vnc.html?host=$(echo $URL | sed 's/https:\/\///')&port=443"
+          echo "🔑 Password: ${{ secrets.VM_PASSWORD || 'Parrot123!' }}"
+          echo "--------------------------------------------------------"
+          # Keep the runner alive for 6 hours or until manually stopped
+          sleep 21600

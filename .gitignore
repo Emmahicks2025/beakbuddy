@@ -16,3 +16,23 @@ web-build/
 /android
 /ios/*
 !/ios/ci_scripts
+
+# Secrets & sensitive files — NEVER commit these
+.env
+*.env.*
+*firebase-adminsdk*.json
+GoogleService-Info.plist
+beakbuddy-accee-firebase-adminsdk-fbsvc-*.json
+fastlane/Fastfile_fixed
+signing/
+credentials.json
+AuthKey_*.p8
+tmp_email.json
+tmp_google.json
+
+# Build artifacts & logs
+build_log.txt
+build_error.log
+job_log.txt
+job_10_log.txt
+.firebase/

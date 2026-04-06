@@ -21,7 +21,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow BeakBuddy to access your microphone for parrot training sessions.",
-        "NSCameraUsageDescription": "Allow BeakBuddy to access your camera to scan food items."
+        "NSCameraUsageDescription": "Allow BeakBuddy to access your camera to scan food items.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

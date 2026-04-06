@@ -60,27 +60,22 @@ workflows:
 
       - name: Build and export IPA
         script: |
-          # maxdepth 1 finds ios/BeakBuddyParrotTrainingAI.xcworkspace (CocoaPods)
-          # NOT ios/BeakBuddyParrotTrainingAI.xcodeproj/project.xcworkspace (internal)
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
           echo "Using workspace: $WORKSPACE"
 
-          # xcode-project use-profiles normally writes this file, but since we
-          # ran it with || true it may not have been created — write it explicitly
-          cat > /tmp/export_options.plist << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>app-store-connect</string>
-              <key>teamID</key>
-              <string>LZ57VL6474</string>
-              <key>signingStyle</key>
-              <string>manual</string>
-          </dict>
-          </plist>
-          EOF
+          # Write export options plist via python3 — heredocs inside
+          # indented YAML blocks produce malformed XML (leading spaces).
+          python3 - << 'PYEOF'
+import plistlib
+data = {
+    "method": "app-store-connect",
+    "teamID": "LZ57VL6474",
+    "signingStyle": "manual",
+}
+with open("/tmp/export_options.plist", "wb") as f:
+    plistlib.dump(data, f)
+print("export_options.plist written OK")
+PYEOF
 
           xcode-project build-ipa \
             --workspace "$WORKSPACE" \

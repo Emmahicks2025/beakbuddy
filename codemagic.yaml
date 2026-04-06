@@ -48,24 +48,16 @@ workflows:
         script: |
           cd ios && pod install --repo-update
 
-      - name: Write App Store Connect API key for Xcode
-        script: |
-          mkdir -p /tmp/authkeys
-          # Use fixed filename to avoid any variable-expansion issues in the path
-          python3 -c "import os; k=os.environ.get('APP_STORE_CONNECT_PRIVATE_KEY','').replace('\\\\n','\\n'); open('/tmp/authkeys/AuthKey.p8','w').write(k)"
-          echo "--- Key file diagnostics ---"
-          echo "First line : $(head -1 /tmp/authkeys/AuthKey.p8)"
-          echo "Last  line : $(tail -1 /tmp/authkeys/AuthKey.p8)"
-          echo "Line count : $(wc -l < /tmp/authkeys/AuthKey.p8)"
-          echo "Byte count : $(wc -c < /tmp/authkeys/AuthKey.p8)"
-          openssl pkey -in /tmp/authkeys/AuthKey.p8 -noout 2>&1 | head -2 || true
 
       - name: Build iOS Archive
         script: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
           echo "Using workspace: $WORKSPACE"
 
-          # Use fixed path + hardcoded credentials — no variable expansion risk
+          # Codemagic places the .p8 key at this path automatically via the integration
+          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_9T452HQ663.p8"
+          echo "Using key: $KEY_PATH"
+
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
@@ -76,12 +68,14 @@ workflows:
             CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM="LZ57VL6474" \
             -allowProvisioningUpdates \
-            -authenticationKeyPath "/tmp/authkeys/AuthKey.p8" \
+            -authenticationKeyPath "$KEY_PATH" \
             -authenticationKeyID "9T452HQ663" \
             -authenticationKeyIssuerID "4f51e329-5618-4798-9bf8-04ab981312c7"
 
       - name: Export IPA
         script: |
+          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_9T452HQ663.p8"
+
           python3 -c "import plistlib; plistlib.dump({'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'automatic','destination':'export'}, open('/tmp/ExportOptions.plist','wb'), fmt=plistlib.FMT_XML)"
 
           xcodebuild \
@@ -90,9 +84,9 @@ workflows:
             -exportPath "$CM_BUILD_DIR/output" \
             -exportOptionsPlist /tmp/ExportOptions.plist \
             -allowProvisioningUpdates \
-            -authenticationKeyPath "/tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8" \
-            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
-            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+            -authenticationKeyPath "$KEY_PATH" \
+            -authenticationKeyID "9T452HQ663" \
+            -authenticationKeyIssuerID "4f51e329-5618-4798-9bf8-04ab981312c7"
 
     artifacts:
       - $CM_BUILD_DIR/output/*.ipa

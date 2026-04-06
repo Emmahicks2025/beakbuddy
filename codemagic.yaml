@@ -30,6 +30,16 @@ workflows:
         script: |
           npx expo prebuild --platform ios --clean --no-install
 
+      - name: Remove Push Notifications entitlement
+        script: |
+          # expo prebuild adds aps-environment even without expo-notifications.
+          # Without it in the provisioning profile this causes xcodebuild exit 65.
+          ENTITLEMENTS=$(find ios -name "*.entitlements" | head -1)
+          if [ -n "$ENTITLEMENTS" ]; then
+            plutil -remove aps-environment "$ENTITLEMENTS" 2>/dev/null || true
+            echo "Stripped aps-environment from $ENTITLEMENTS"
+          fi
+
       - name: Patch Podfile for Firebase compatibility
         script: |
           sed -i '' "s/  use_expo_modules!/  use_modular_headers!\n  use_expo_modules!/" ios/Podfile
@@ -48,6 +58,12 @@ workflows:
           openssl genrsa -out /tmp/cert_key.pem 2048
 
           keychain initialize
+
+          # Remove existing distribution certs so the new key doesn't hit
+          # Apple's 409 "already have a current Distribution certificate" limit.
+          app-store-connect list-certificates --type DISTRIBUTION --json 2>/dev/null \
+            | python3 -c "import json,sys,subprocess; [subprocess.run(['app-store-connect','delete-certificate',c['id']]) for c in json.load(sys.stdin).get('data',[])]" \
+            || true
 
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --platform IOS \

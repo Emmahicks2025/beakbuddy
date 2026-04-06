@@ -8,9 +8,6 @@ workflows:
       app_store_connect: Codemagic
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.beakbuddy.app
       vars:
         BUNDLE_ID: "com.beakbuddy.app"
         XCODE_SCHEME: "beakbuddy"
@@ -36,11 +33,29 @@ workflows:
         script: |
           cd ios && pod install
 
+      - name: Set up keychain
+        script: |
+          keychain initialize
+
+      - name: Fetch signing files from Apple Developer Portal
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Add certificates to keychain
+        script: |
+          keychain add-certificates
+
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+
       - name: Build iOS .ipa for App Store
         script: |
           xcode-project build-ipa \
             --workspace "ios/beakbuddy.xcworkspace" \
-            --scheme "beakbuddy"
+            --scheme "$XCODE_SCHEME"
 
     artifacts:
       - build/ios/ipa/*.ipa

@@ -63,19 +63,9 @@ workflows:
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
           echo "Using workspace: $WORKSPACE"
 
-          # Write export options plist via python3 — heredocs inside
-          # indented YAML blocks produce malformed XML (leading spaces).
-          python3 - << 'PYEOF'
-import plistlib
-data = {
-    "method": "app-store-connect",
-    "teamID": "LZ57VL6474",
-    "signingStyle": "manual",
-}
-with open("/tmp/export_options.plist", "wb") as f:
-    plistlib.dump(data, f)
-print("export_options.plist written OK")
-PYEOF
+          # One-liner avoids heredoc YAML indentation issues entirely
+          python3 -c "import plistlib; plistlib.dump({'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'manual'}, open('/tmp/export_options.plist','wb'))"
+          echo "export_options.plist written"
 
           xcode-project build-ipa \
             --workspace "$WORKSPACE" \

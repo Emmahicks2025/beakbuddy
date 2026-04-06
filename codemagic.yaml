@@ -56,12 +56,8 @@ workflows:
 
           keychain initialize
 
-          # Delete any existing Distribution certs to avoid 409 on future builds
-          app-store-connect certificates list --type DISTRIBUTION 2>/dev/null \
-            | grep -oE '^[A-Z0-9]{8,}' \
-            | while read CERT_ID; do
-                app-store-connect certificates delete "$CERT_ID" 2>/dev/null && echo "Deleted cert $CERT_ID" || true
-              done || true
+          # Delete existing Distribution certs via REST API (avoids CLI output format guessing)
+          python3 -c "import json,urllib.request,time,base64,pathlib; from cryptography.hazmat.primitives.serialization import load_pem_private_key; from cryptography.hazmat.primitives import hashes; from cryptography.hazmat.primitives.asymmetric import ec; from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature; k=load_pem_private_key(pathlib.Path('/Users/builder/.appstoreconnect/private_keys/AuthKey_9T452HQ663.p8').read_bytes(),password=None); ub=lambda d:base64.urlsafe_b64encode(d if isinstance(d,bytes) else d.encode()).rstrip(b'=').decode(); h=ub(json.dumps({'alg':'ES256','kid':'9T452HQ663','typ':'JWT'})); p=ub(json.dumps({'iss':'4f51e329-5618-4798-9bf8-04ab981312c7','iat':int(time.time()),'exp':int(time.time())+1200,'aud':'appstoreconnect-v1'})); der=k.sign((h+'.'+p).encode(),ec.ECDSA(hashes.SHA256())); r,s=decode_dss_signature(der); tok=h+'.'+p+'.'+ub(r.to_bytes(32,'big')+s.to_bytes(32,'big')); resp=json.load(urllib.request.urlopen(urllib.request.Request('https://api.appstoreconnect.apple.com/v1/certificates?filter[certificateType]=DISTRIBUTION&limit=25',headers={'Authorization':'Bearer '+tok}))); [urllib.request.urlopen(urllib.request.Request('https://api.appstoreconnect.apple.com/v1/certificates/'+c['id'],method='DELETE',headers={'Authorization':'Bearer '+tok})) or print('Deleted',c['id']) for c in resp.get('data',[])]" || true
 
           # Create Distribution cert + App Store provisioning profile
           app-store-connect fetch-signing-files "$BUNDLE_ID" \

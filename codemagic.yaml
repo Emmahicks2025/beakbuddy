@@ -51,16 +51,21 @@ workflows:
       - name: Write App Store Connect API key for Xcode
         script: |
           mkdir -p /tmp/authkeys
-          # APP_STORE_CONNECT_PRIVATE_KEY may store literal \n instead of real
-          # newlines. Python normalizes them so the .p8 file is valid PEM.
-          python3 -c "import os; k=os.environ.get('APP_STORE_CONNECT_PRIVATE_KEY','').replace('\\\\n','\\n'); p='/tmp/authkeys/AuthKey_'+os.environ.get('APP_STORE_CONNECT_KEY_IDENTIFIER','')+'.p8'; open(p,'w').write(k); print('Written',len(k),'chars,',k.count('\\n'),'lines')"
-          echo "Key first line: $(head -1 /tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8)"
+          # Use fixed filename to avoid any variable-expansion issues in the path
+          python3 -c "import os; k=os.environ.get('APP_STORE_CONNECT_PRIVATE_KEY','').replace('\\\\n','\\n'); open('/tmp/authkeys/AuthKey.p8','w').write(k)"
+          echo "--- Key file diagnostics ---"
+          echo "First line : $(head -1 /tmp/authkeys/AuthKey.p8)"
+          echo "Last  line : $(tail -1 /tmp/authkeys/AuthKey.p8)"
+          echo "Line count : $(wc -l < /tmp/authkeys/AuthKey.p8)"
+          echo "Byte count : $(wc -c < /tmp/authkeys/AuthKey.p8)"
+          openssl pkey -in /tmp/authkeys/AuthKey.p8 -noout 2>&1 | head -2 || true
 
       - name: Build iOS Archive
         script: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
           echo "Using workspace: $WORKSPACE"
 
+          # Use fixed path + hardcoded credentials — no variable expansion risk
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
@@ -69,11 +74,11 @@ workflows:
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
             clean archive \
             CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
+            DEVELOPMENT_TEAM="LZ57VL6474" \
             -allowProvisioningUpdates \
-            -authenticationKeyPath "/tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8" \
-            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
-            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+            -authenticationKeyPath "/tmp/authkeys/AuthKey.p8" \
+            -authenticationKeyID "9T452HQ663" \
+            -authenticationKeyIssuerID "4f51e329-5618-4798-9bf8-04ab981312c7"
 
       - name: Export IPA
         script: |

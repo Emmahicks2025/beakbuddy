@@ -51,16 +51,13 @@ workflows:
 
       - name: Set up code signing
         script: |
-          # Generate a fresh RSA key for the distribution certificate
-          openssl genrsa -out /tmp/cert_key.pem 2048
+          # Decode the stable cert key stored in Codemagic env vars
+          # (same key every build = same cert reused, no 409 conflicts)
+          echo "$CERT_PRIVATE_KEY_B64" | base64 --decode > /tmp/cert_key.pem
 
           keychain initialize
 
-          app-store-connect list-certificates --type DISTRIBUTION --json 2>/dev/null \
-            | python3 -c "import json,sys,subprocess; [subprocess.run(['app-store-connect','delete-certificate',c['id']]) for c in json.load(sys.stdin).get('data',[])]" \
-            || true
-
-          # Fetch / create App Store signing files (Distribution cert + App Store profile)
+          # Fetch existing App Store cert+profile (creates cert only on first build)
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --platform IOS \
             --type IOS_APP_STORE \
@@ -69,15 +66,15 @@ workflows:
 
           keychain add-certificates
 
-          # Extract profile UUID so xcodebuild can use manual signing
+          # Extract profile UUID for manual signing in xcodebuild
           PROFILE=$(find "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
                     -name "*.mobileprovision" 2>/dev/null | head -1)
           if [ -z "$PROFILE" ]; then
-            echo "ERROR: No provisioning profile found after fetch-signing-files"
+            echo "ERROR: No provisioning profile found"
             exit 1
           fi
           UUID=$(security cms -D -i "$PROFILE" \
-                 | python3 -c "import sys, plistlib; print(plistlib.loads(sys.stdin.buffer.read())['UUID'])")
+                 | python3 -c "import sys,plistlib; print(plistlib.loads(sys.stdin.buffer.read())['UUID'])")
           echo "Profile UUID: $UUID"
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"

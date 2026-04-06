@@ -98,11 +98,16 @@ workflows:
 
       - name: Export IPA
         script: |
-          PROFILE=$(find "$HOME/Library/MobileDevice/Provisioning Profiles" -name "*.mobileprovision" 2>/dev/null | head -1)
+          # Codemagic tools put profiles in UserData, NOT MobileDevice. Search both just in case.
+          PROFILE=$(find "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" "$HOME/Library/MobileDevice/Provisioning Profiles" -name "*.mobileprovision" 2>/dev/null | head -1)
+          if [ -z "$PROFILE" ]; then echo "ERROR: No provisioning profile found"; exit 1; fi
+          
           UUID=$(security cms -D -i "$PROFILE" | python3 -c "import sys,plistlib; print(plistlib.loads(sys.stdin.buffer.read())['UUID'])")
-          python3 -c "import plistlib; p={'method':'app-store','teamID':'$DEVELOPMENT_TEAM','signingStyle':'manual','provisioningProfiles':{'$BUNDLE_ID':'$UUID'}}; plistlib.dump(p,open('/tmp/ExportOptions.plist','wb'),fmt=plistlib.FMT_XML)"
-          echo '=== ExportOptions.plist ==='
+          python3 -c "import plistlib; p={'method':'app-store-connect','teamID':'$DEVELOPMENT_TEAM','signingStyle':'manual','provisioningProfiles':{'$BUNDLE_ID':'$UUID'}}; plistlib.dump(p,open('/tmp/ExportOptions.plist','wb'),fmt=plistlib.FMT_XML)"
+          
+          echo "=== ExportOptions.plist ==="
           cat /tmp/ExportOptions.plist
+          
           xcodebuild \
             -exportArchive \
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \

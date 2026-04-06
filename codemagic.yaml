@@ -49,15 +49,55 @@ workflows:
           cd ios && pod install --repo-update
 
 
+      - name: Set up code signing
+        script: |
+          # Generate a fresh RSA key for the distribution certificate
+          openssl genrsa -out /tmp/cert_key.pem 2048
+
+          keychain initialize
+
+          # Remove old distribution certs to avoid 409 conflicts
+          app-store-connect list-certificates --type DISTRIBUTION --json 2>/dev/null \
+            | python3 -c "
+import json, sys, subprocess
+certs = json.load(sys.stdin).get('data', [])
+for c in certs:
+    subprocess.run(['app-store-connect', 'delete-certificate', c['id']])
+print(f'Deleted {len(certs)} old cert(s)')
+" || true
+
+          # Fetch / create App Store signing files (Distribution cert + App Store profile)
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --platform IOS \
+            --type IOS_APP_STORE \
+            --create \
+            --certificate-key @file:/tmp/cert_key.pem
+
+          keychain add-certificates
+
+          # Extract profile UUID so xcodebuild can use manual signing
+          PROFILE=$(find "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
+                    -name "*.mobileprovision" 2>/dev/null | head -1)
+          if [ -z "$PROFILE" ]; then
+            echo "ERROR: No provisioning profile found after fetch-signing-files"
+            exit 1
+          fi
+          UUID=$(security cms -D -i "$PROFILE" \
+                 | python3 -c "import sys, plistlib; print(plistlib.loads(sys.stdin.buffer.read())['UUID'])")
+          echo "Profile UUID: $UUID"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
+          echo "$UUID" > /tmp/profile_uuid.txt
+
       - name: Build iOS Archive
         script: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
           echo "Using workspace: $WORKSPACE"
 
-          # Codemagic places the .p8 key at this path automatically via the integration
-          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_9T452HQ663.p8"
-          echo "Using key: $KEY_PATH"
+          PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
+          echo "Using profile UUID: $PROFILE_UUID"
 
+          # Manual signing — no registered devices needed (unlike Automatic)
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
@@ -65,28 +105,33 @@ workflows:
             -sdk iphoneos \
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
             clean archive \
-            CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM="LZ57VL6474" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" \
-            -authenticationKeyID "9T452HQ663" \
-            -authenticationKeyIssuerID "4f51e329-5618-4798-9bf8-04ab981312c7"
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE="$PROFILE_UUID" \
+            DEVELOPMENT_TEAM="LZ57VL6474"
 
       - name: Export IPA
         script: |
-          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_9T452HQ663.p8"
+          PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
+          echo "Using profile UUID: $PROFILE_UUID"
 
-          python3 -c "import plistlib; plistlib.dump({'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'automatic','destination':'export'}, open('/tmp/ExportOptions.plist','wb'), fmt=plistlib.FMT_XML)"
+          python3 -c "
+import plistlib
+opts = {
+    'method': 'app-store-connect',
+    'teamID': 'LZ57VL6474',
+    'signingStyle': 'manual',
+    'provisioningProfiles': {'com.beakbuddy.app': '$PROFILE_UUID'}
+}
+plistlib.dump(opts, open('/tmp/ExportOptions.plist','wb'), fmt=plistlib.FMT_XML)
+print('ExportOptions.plist written')
+"
 
           xcodebuild \
             -exportArchive \
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
             -exportPath "$CM_BUILD_DIR/output" \
-            -exportOptionsPlist /tmp/ExportOptions.plist \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" \
-            -authenticationKeyID "9T452HQ663" \
-            -authenticationKeyIssuerID "4f51e329-5618-4798-9bf8-04ab981312c7"
+            -exportOptionsPlist /tmp/ExportOptions.plist
 
     artifacts:
       - $CM_BUILD_DIR/output/*.ipa

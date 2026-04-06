@@ -72,28 +72,16 @@ workflows:
 
           keychain add-certificates
 
-          # Extract profile UUID for explicit manual signing (avoids node_modules xcodeproj issues)
-          PROFILE=$(find "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
-                    "$HOME/Library/MobileDevice/Provisioning Profiles" \
-                    -name "*.mobileprovision" 2>/dev/null | head -1)
-          if [ -z "$PROFILE" ]; then
-            echo "ERROR: No provisioning profile found"
-            exit 1
-          fi
-          UUID=$(security cms -D -i "$PROFILE" \
-                 | python3 -c "import sys,plistlib; print(plistlib.loads(sys.stdin.buffer.read())['UUID'])")
-          echo "Profile UUID: $UUID"
-          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
-          echo "$UUID" > /tmp/profile_uuid.txt
+          # Apply profiles natively to the main project ONLY (avoids node_modules and Pods scanning issues)
+          PROJECT=$(find ios -maxdepth 1 -name "*.xcodeproj" | head -1)
+          xcode-project use-profiles --project "$PROJECT"
 
       - name: Build iOS Archive
         script: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
-          PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
           echo "Using workspace: $WORKSPACE"
-          echo "Using profile UUID: $PROFILE_UUID"
           mkdir -p /tmp/xcodebuild_logs
+          # Run without global signing flags—xcode-project use-profiles already configured the main project
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
@@ -102,10 +90,6 @@ workflows:
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
             -derivedDataPath /tmp/xcode-dd \
             clean archive \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE="$PROFILE_UUID" \
-            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
             2>&1 | tee /tmp/xcodebuild_logs/build.log; STATUS=${PIPESTATUS[0]}
           echo '=== ACTUAL BUILD ERRORS ==='
           grep -E '^.*(error:|fatal error:)' /tmp/xcodebuild_logs/build.log | grep -v 'note:' | head -30 || true

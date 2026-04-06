@@ -8,12 +8,12 @@ workflows:
       app_store_connect: Codemagic
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.beakbuddy.app
+      groups:
+        - ios_signing_creds
       vars:
         BUNDLE_ID: "com.beakbuddy.app"
         XCODE_SCHEME: "beakbuddy"
+        DEVELOPMENT_TEAM: "LZ57VL6474"
       node: 18.17.0
       xcode: 16.2
       cocoapods: default
@@ -40,6 +40,21 @@ workflows:
       - name: Install CocoaPods dependencies
         script: |
           cd ios && pod install --repo-update
+
+      - name: Set up code signing
+        script: |
+          # Install provisioning profile
+          PROFILE_UUID=$(security cms -D -i "$PROV_PROFILE" | grep -A1 UUID | grep string | sed 's/.*<string>\(.*\)<\/string>/\1/')
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$PROV_PROFILE" ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
+          echo "Installed profile: $PROFILE_UUID"
+
+          # Initialize keychain and import certificate
+          keychain initialize
+          keychain add-certificates --certificate "$DIST_CERT" --certificate-password "$CERT_PASSWORD"
+
+          # Configure Xcode project to use the installed profile
+          xcode-project use-profiles
 
       - name: Build iOS .ipa for App Store
         script: |

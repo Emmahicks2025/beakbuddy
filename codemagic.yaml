@@ -53,9 +53,8 @@ workflows:
 
       - name: Set up code signing
         script: |
-          # Decode the stable cert key stored in Codemagic env vars
-          # (same key every build = same cert reused, no 409 conflicts)
-          echo "$CERT_PRIVATE_KEY_B64" | base64 --decode > /tmp/cert_key.pem
+          # Decode the stable cert key — use Python3 (macOS base64 flags differ from Linux)
+          python3 -c "import base64,os,sys; raw=os.environ.get('CERT_PRIVATE_KEY_B64',''); print('CERT_PRIVATE_KEY_B64 length:',len(raw)); sys.exit('ERROR: CERT_PRIVATE_KEY_B64 is empty — check Codemagic env vars') if not raw else open('/tmp/cert_key.pem','wb').write(base64.b64decode(raw.strip().replace('\\r','').replace('\\n','')+'=='))"
 
           keychain initialize
 

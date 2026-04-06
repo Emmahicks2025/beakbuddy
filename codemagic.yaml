@@ -8,6 +8,8 @@ workflows:
       app_store_connect: Codemagic
 
     environment:
+      groups:
+        - ios_signing_creds
       vars:
         BUNDLE_ID: "com.beakbuddy.app"
         XCODE_SCHEME: "BeakBuddyParrotTrainingAI"

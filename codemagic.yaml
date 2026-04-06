@@ -40,12 +40,16 @@ workflows:
 
       - name: Patch Podfile for Firebase compatibility
         script: |
-          python3 -c "f='ios/Podfile'; t=open(f).read(); open(f,'w').write(t.replace('prepare_react_native_project!','prepare_react_native_project!\nuse_modular_headers!',1) if 'use_modular_headers!' not in t and 'prepare_react_native_project!' in t else (t.replace('target ','use_modular_headers!\n\ntarget ',1) if 'use_modular_headers!' not in t else t))"
-          grep -n 'use_modular_headers\|prepare_react_native' ios/Podfile || echo 'WARNING: pattern not found'
+          # Add $RNFirebaseAsStaticFramework = true (required for React Native Firebase)
+          python3 -c "f='ios/Podfile'; t=open(f).read(); open(f,'w').write(t.replace('prepare_react_native_project!','\$RNFirebaseAsStaticFramework = true\nprepare_react_native_project!',1) if '\$RNFirebaseAsStaticFramework' not in t else t)"
+          echo '=== Podfile head (first 15 lines) ==='
+          head -15 ios/Podfile
+          echo '=== End Podfile head ==='
 
       - name: Install CocoaPods dependencies
         script: |
-          cd ios && pod install --repo-update
+          # USE_FRAMEWORKS=static resolves React-RCTAppDelegate module compilation errors
+          cd ios && USE_FRAMEWORKS=static pod install --repo-update
 
       - name: Set up code signing
         script: |
@@ -89,7 +93,7 @@ workflows:
           PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
           echo "Using workspace: $WORKSPACE"
           echo "Using profile UUID: $PROFILE_UUID"
-          # Use explicit derivedDataPath to avoid stale build cache between runs
+          mkdir -p /tmp/xcodebuild_logs
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
@@ -101,7 +105,12 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
             PROVISIONING_PROFILE="$PROFILE_UUID" \
-            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM"
+            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
+            2>&1 | tee /tmp/xcodebuild_logs/build.log; STATUS=${PIPESTATUS[0]}
+          echo '=== ACTUAL BUILD ERRORS ==='
+          grep -E '^.*(error:|fatal error:)' /tmp/xcodebuild_logs/build.log | grep -v 'note:' | head -30 || true
+          echo '==========================='
+          exit $STATUS
 
       - name: Export IPA
         script: |

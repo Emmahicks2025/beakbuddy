@@ -8,8 +8,9 @@ workflows:
       app_store_connect: Codemagic
 
     environment:
-      groups:
-        - ios_signing_creds
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.beakbuddy.app
       vars:
         BUNDLE_ID: "com.beakbuddy.app"
         XCODE_SCHEME: "BeakBuddyParrotTrainingAI"
@@ -34,8 +35,6 @@ workflows:
 
       - name: Remove Push Notifications entitlement
         script: |
-          # expo prebuild adds aps-environment even without expo-notifications.
-          # Without it in the provisioning profile this causes xcodebuild exit 65.
           ENTITLEMENTS=$(find ios -name "*.entitlements" | head -1)
           if [ -n "$ENTITLEMENTS" ]; then
             plutil -remove aps-environment "$ENTITLEMENTS" 2>/dev/null || true
@@ -50,46 +49,14 @@ workflows:
         script: |
           cd ios && pod install --repo-update
 
-
-      - name: Set up code signing
+      - name: Apply code signing profiles
         script: |
-          # Decode the stable cert key — use Python3 (macOS base64 flags differ from Linux)
-          python3 -c "import base64,os,sys; raw=os.environ.get('CERT_PRIVATE_KEY_B64',''); print('CERT_PRIVATE_KEY_B64 length:',len(raw)); sys.exit('ERROR: CERT_PRIVATE_KEY_B64 is empty — check Codemagic env vars') if not raw else open('/tmp/cert_key.pem','wb').write(base64.b64decode(raw.strip().replace('\\r','').replace('\\n','')+'=='))"
-
-          keychain initialize
-
-          # Fetch existing App Store cert+profile (creates cert only on first build)
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --platform IOS \
-            --type IOS_APP_STORE \
-            --create \
-            --certificate-key @file:/tmp/cert_key.pem
-
-          keychain add-certificates
-
-          # Extract profile UUID for manual signing in xcodebuild
-          PROFILE=$(find "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
-                    -name "*.mobileprovision" 2>/dev/null | head -1)
-          if [ -z "$PROFILE" ]; then
-            echo "ERROR: No provisioning profile found"
-            exit 1
-          fi
-          UUID=$(security cms -D -i "$PROFILE" \
-                 | python3 -c "import sys,plistlib; print(plistlib.loads(sys.stdin.buffer.read())['UUID'])")
-          echo "Profile UUID: $UUID"
-          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
-          echo "$UUID" > /tmp/profile_uuid.txt
+          xcode-project use-profiles
 
       - name: Build iOS Archive
         script: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
           echo "Using workspace: $WORKSPACE"
-
-          PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
-          echo "Using profile UUID: $PROFILE_UUID"
-
-          # Manual signing — no registered devices needed (unlike Automatic)
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
@@ -97,19 +64,11 @@ workflows:
             -sdk iphoneos \
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
             clean archive \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE="$PROFILE_UUID" \
-            DEVELOPMENT_TEAM="LZ57VL6474"
+            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM"
 
       - name: Export IPA
         script: |
-          PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
-          echo "Using profile UUID: $PROFILE_UUID"
-
-          # Write ExportOptions.plist — reads profile UUID from file (avoids shell-in-Python quoting)
-          python3 -c "import plistlib; u=open('/tmp/profile_uuid.txt').read().strip(); p={'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'manual','provisioningProfiles':{'com.beakbuddy.app':u}}; plistlib.dump(p,open('/tmp/ExportOptions.plist','wb'),fmt=plistlib.FMT_XML); print('plist written, profile UUID:',u)"
-
+          python3 -c "import plistlib; p={'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'manual','destination':'export'}; plistlib.dump(p,open('/tmp/ExportOptions.plist','wb'),fmt=plistlib.FMT_XML); print('ExportOptions.plist written')"
           xcodebuild \
             -exportArchive \
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \

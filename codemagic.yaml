@@ -5,7 +5,7 @@ workflows:
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: Codemagic   # Uses the API key already saved in team settings
+      app_store_connect: Codemagic
 
     environment:
       vars:
@@ -48,49 +48,52 @@ workflows:
         script: |
           cd ios && pod install --repo-update
 
-      - name: Set up automatic code signing
+      - name: Write App Store Connect API key for Xcode
         script: |
-          # Generate a fresh RSA private key for the distribution certificate.
-          # This sidesteps "Cannot save Signing Certificates without certificate
-          # private key" — instead of trying to reuse an existing cert whose
-          # private key isn't available, we supply our own key and --create
-          # makes a brand-new cert signed by it.
-          openssl genrsa -out /tmp/cert_key.pem 2048
+          # Expose the API key as a .p8 file so xcodebuild can use it
+          # for automatic signing (-authenticationKeyPath).
+          # APP_STORE_CONNECT_PRIVATE_KEY / KEY_IDENTIFIER / ISSUER_ID
+          # are injected automatically by the Codemagic integration.
+          mkdir -p /tmp/authkeys
+          echo -n "$APP_STORE_CONNECT_PRIVATE_KEY" \
+            > /tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+          echo "API key written to /tmp/authkeys/"
 
-          keychain initialize
-
-          # Remove existing distribution certs so the new key doesn't hit
-          # Apple's 409 "already have a current Distribution certificate" limit.
-          app-store-connect list-certificates --type DISTRIBUTION --json 2>/dev/null \
-            | python3 -c "import json,sys,subprocess; [subprocess.run(['app-store-connect','delete-certificate',c['id']]) for c in json.load(sys.stdin).get('data',[])]" \
-            || true
-
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --platform IOS \
-            --type IOS_APP_STORE \
-            --create \
-            --certificate-key @file:/tmp/cert_key.pem
-
-          keychain add-certificates
-          # node_modules is no longer needed after pod install.
-          # Removing it prevents use-profiles from crashing on
-          # node_modules/@react-native-community/datetimepicker/ios/
-          rm -rf node_modules
-          xcode-project use-profiles
-
-      - name: Build and export IPA
+      - name: Build iOS Archive
         script: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
           echo "Using workspace: $WORKSPACE"
-          # use-profiles already wrote ~/export_options.plist — no need to
-          # create one manually or pass --export-options-plist
-          xcode-project build-ipa \
-            --workspace "$WORKSPACE" \
-            --scheme "$XCODE_SCHEME" \
-            --config Release
+
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
+            clean archive \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "/tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8" \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+
+      - name: Export IPA
+        script: |
+          python3 -c "import plistlib; plistlib.dump({'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'automatic','destination':'export'}, open('/tmp/ExportOptions.plist','wb'), fmt=plistlib.FMT_XML)"
+
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
+            -exportPath "$CM_BUILD_DIR/output" \
+            -exportOptionsPlist /tmp/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "/tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8" \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
 
     artifacts:
-      - build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/output/*.ipa
       - /tmp/xcodebuild_logs/*.log
 
     publishing:

@@ -1,0 +1,59 @@
+workflows:
+  beakbuddy-ios-appstore:
+    name: BeakBuddy iOS — App Store
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    integrations:
+      app_store_connect: Codemagic  # Name of the API key you add in Codemagic dashboard
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.beakbuddy.app
+      vars:
+        BUNDLE_ID: "com.beakbuddy.app"
+        XCODE_SCHEME: "beakbuddy"
+      node: 18.17.0
+      xcode: 16.2
+      cocoapods: default
+
+    cache:
+      cache_paths:
+        - $HOME/.npm
+        - $HOME/Library/Caches/CocoaPods
+
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm ci
+
+      - name: Run Expo Prebuild (generates iOS native project)
+        script: |
+          npx expo prebuild --platform ios --clean --no-install
+
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod install
+
+      - name: Build iOS .ipa for App Store
+        script: |
+          xcode-project build-ipa \
+            --workspace "ios/beakbuddy.xcworkspace" \
+            --scheme "beakbuddy"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        api_key: Codemagic
+        submit_to_testflight: true   # Goes to TestFlight first for safety
+        submit_to_app_store: false   # Change to true when ready to go live
+      email:
+        recipients:
+          - your-email@example.com   # Replace with your email to get notified
+        notify:
+          success: true
+          failure: true

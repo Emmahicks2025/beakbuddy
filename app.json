@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "BeakBuddy: Parrot Training AI",
+    "slug": "beakbuddy",
+    "scheme": "beakbuddy",
+    "version": "1.2.7",
+    "orientation": "portrait",
+    "icon": "./logo-png.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.beakbuddy.app",
+      "buildNumber": "20",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Allow BeakBuddy to access your microphone for parrot training sessions.",
+        "NSCameraUsageDescription": "Allow BeakBuddy to access your camera to scan food items."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./logo-png.png",
+        "backgroundColor": "#0F172A"
+      },
+      "package": "com.beakbuddy.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow BeakBuddy to access your camera to scan food items."
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ce05eba6-7504-4253-8b9e-089950e2e3c5"
+      }
+    }
+  }
+}

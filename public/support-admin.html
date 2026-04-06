@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - BeakBuddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --secondary: #3B82F6;
+            --accent: #10B981;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            color: white;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-New {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60A5FA;
+        }
+
+        .status-Resolved {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34D399;
+        }
+
+        .ticket-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .btn-refresh {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Staff Ticket Dashboard</h1>
+            <button class="btn-refresh" onclick="location.reload()">Refresh Feed</button>
+        </div>
+
+        <div class="glass-card">
+            <div id="loading" style="text-align: center; padding: 40px;">Loading tickets...</div>
+            <table id="tickets-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Category</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="tickets-body">
+                    <!-- Tickets injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWC2pgbz1iEQbzpZmDxYGH5UTANoG0XT0",
+            authDomain: "beakbuddy-accee.firebaseapp.com",
+            projectId: "beakbuddy-accee",
+            storageBucket: "beakbuddy-accee.firebasestorage.app",
+            messagingSenderId: "452578545648",
+            appId: "1:452578545648:ios:a87a26814f1dd73b701735",
+            measurementId: "G-7RN4EB6MJR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadTickets() {
+            const q = query(collection(db, "tickets"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+
+            const tbody = document.getElementById('tickets-body');
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('tickets-table').style.display = 'table';
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+
+                const row = document.createElement('tr');
+                row.className = 'ticket-row';
+                row.innerHTML = `
+                    <td style="font-weight: 800; color: #E0E7FF;">${data.ticketId}</td>
+                    <td>
+                        <div style="font-weight: 600;">${data.name}</div>
+                        <div style="font-size: 0.8rem; color: #94a3b8;">${data.email}</div>
+                    </td>
+                    <td>${data.category}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${data.message}</td>
+                    <td><span class="status-badge status-${data.status}">${data.status}</span></td>
+                    <td>${date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        loadTickets().catch(err => {
+            console.error(err);
+            document.getElementById('loading').innerText = "Failed to load tickets. Ensure database rules allow staff access.";
+        });
+    </script>
+</body>
+
+</html>

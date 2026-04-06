@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - BeakBuddy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --secondary: #3B82F6;
+            --accent: #10B981;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            color: white;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+        }
+
+        h1 {
+            margin-bottom: 24px;
+            background: linear-gradient(to right, #A5B4FC, #10B981);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            color: var(--accent);
+            margin-top: 32px;
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+        }
+
+        .faq-item {
+            margin-bottom: 24px;
+            padding-left: 16px;
+            border-left: 2px solid var(--primary);
+        }
+
+        .faq-q {
+            font-weight: 600;
+            color: #E0E7FF;
+            margin-bottom: 8px;
+        }
+
+        .faq-a {
+            color: #94a3b8;
+        }
+
+        .contact-info {
+            margin-top: 40px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .email-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="glass-card">
+            <h1>Help & Support center</h1>
+            <p>Welcome to the BeakBuddy Support Center. Whether you're a first-time budgie owner or an experienced macaw
+                enthusiast, we're here to help you navigate our app and provide the best care for your feathered
+                companions.</p>
+
+            <h2>🦜 Parrot Care Resources</h2>
+            <div class="faq-item">
+                <div class="faq-q">Where can I find an Avian Veterinarian?</div>
+                <div class="faq-a">We always recommend professional care for medical issues. Use the <a
+                        href="https://www.aav.org/search/custom.asp?id=1803" target="_blank"
+                        style="color: var(--accent);">Association of Avian Veterinarians (AAV) Search</a> to find a
+                    certified specialist in your area.</div>
+            </div>
+
+            <h2>📱 App Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <div class="faq-q">How accurate is the AI Food Safety Scanner?</div>
+                <div class="faq-a">Our AI is trained on thousands of verified avian nutritional datasets. However, it is
+                    a tool for guidance, not a medical device. If the scanner gives a "Toxic" or "Caution" result, do
+                    not feed the item. If you are ever unsure, always err on the side of caution.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">Can I manage multiple parrots in one account?</div>
+                <div class="faq-a">Yes! Use the "Switch Profile" option in the Profile tab to add and manage different
+                    parrots, each with their own training plans, diet logs, and care schedules.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q">I upgraded to Premium but features are still locked.</div>
+                <div class="faq-a">If your purchase isn't showing, go to the Subscription screen and tap "Restore
+                    Purchase." Ensure you are signed into the same Apple/Google ID used for the initial purchase.</div>
+            </div>
+
+            <h2>🔧 Technical Troubleshooting</h2>
+            <div class="faq-item">
+                <div class="faq-q">The Camera Scanner is showing a black screen.</div>
+                <div class="faq-a">This usually indicates a permissions issue. Go to your device's Settings > BeakBuddy
+                    and ensure "Camera" access is enabled.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-a">Ensure you have updated to the latest version via the App Store or Google Play. If
+                    the issue persists, try clearing the app cache or performing a fresh reinstall. Your profile data is
+                    safely stored in the cloud (Firebase) and will return when you log back in.</div>
+            </div>
+
+            <div id="ticketing-section" class="contact-info" style="text-align: left;">
+                <h2 style="text-align: center;">Open a Support Ticket</h2>
+                <p style="text-align: center; margin-bottom: 24px;">Need direct assistance? Open a ticket below and our
+                    team will get back to you.</p>
+
+                <form id="ticket-form" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #E0E7FF;">Full
+                            Name</label>
+                        <input type="text" id="name" required
+                            style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: white; outline: none;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #E0E7FF;">Email
+                            Address</label>
+                        <input type="email" id="email" required
+                            style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: white; outline: none;">
+                    </div>
+                    <div>
+                        <label
+                            style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #E0E7FF;">Category</label>
+                        <select id="category"
+                            style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: white; outline: none;">
+                            <option value="General Inquiry">General Inquiry</option>
+                            <option value="Billing/Subscription">Billing/Subscription</option>
+                            <option value="Technical Issue">Technical Issue</option>
+                            <option value="Care/Training Question">Care/Training Question</option>
+                            <option value="Feature Request">Feature Request</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #E0E7FF;">Message</label>
+                        <textarea id="message" required rows="4"
+                            style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: white; outline: none;"></textarea>
+                    </div>
+
+                    <button type="submit" id="submit-btn"
+                        style="background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.3s ease;">
+                        Submit Ticket
+                    </button>
+                </form>
+
+                <div id="success-message"
+                    style="display: none; text-align: center; padding: 20px; border: 1px dashed var(--accent); border-radius: 16px; background: rgba(16, 185, 129, 0.05);">
+                    <h3 style="color: var(--accent);">Ticket Submitted!</h3>
+                    <p style="margin: 10px 0;">Your Ticket ID is: <strong id="ticket-id-display"
+                            style="color: white; background: #1e293b; padding: 4px 8px; border-radius: 4px;"></strong>
+                    </p>
+                    <p style="font-size: 0.9rem; color: #94a3b8;">We've sent a confirmation to your email. Our team will
+                        respond within 24 hours.</p>
+                    <button onclick="location.reload()"
+                        style="margin-top: 16px; background: transparent; border: 1px solid var(--border); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer;">Send
+                        Another</button>
+                </div>
+            </div>
+
+            <!-- Firebase Ticketing Logic -->
+            <script type="module">
+                import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+                import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBWC2pgbz1iEQbzpZmDxYGH5UTANoG0XT0",
+                    authDomain: "beakbuddy-accee.firebaseapp.com",
+                    projectId: "beakbuddy-accee",
+                    storageBucket: "beakbuddy-accee.firebasestorage.app",
+                    messagingSenderId: "452578545648",
+                    appId: "1:452578545648:ios:a87a26814f1dd73b701735",
+                    measurementId: "G-7RN4EB6MJR"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+
+                const form = document.getElementById('ticket-form');
+                const successMsg = document.getElementById('success-message');
+                const submitBtn = document.getElementById('submit-btn');
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const ticketId = 'BB-' + Math.floor(10000 + Math.random() * 90000);
+                    const ticketData = {
+                        ticketId: ticketId,
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        category: document.getElementById('category').value,
+                        message: document.getElementById('message').value,
+                        status: 'New',
+                        createdAt: serverTimestamp()
+                    };
+
+                    try {
+                        submitBtn.innerText = 'Submitting...';
+                        submitBtn.disabled = true;
+
+                        await addDoc(collection(db, "tickets"), ticketData);
+
+                        document.getElementById('ticket-id-display').innerText = ticketId;
+                        form.style.display = 'none';
+                        successMsg.style.display = 'block';
+                    } catch (error) {
+                        console.error("Error adding document: ", error);
+                        alert("Failed to submit ticket. Please try again or email emmahicks2022@gmail.com directly.");
+                        submitBtn.innerText = 'Submit Ticket';
+                        submitBtn.disabled = false;
+                    }
+                });
+            </script>
+
+            <div class="contact-info">
+                <h2>Direct Support</h2>
+                <p>Can't find what you're looking for?</p>
+                <div style="margin: 20px 0;">
+                    <a href="mailto:emmahicks2022@gmail.com" class="email-link">emmahicks2022@gmail.com</a>
+                </div>
+                <p style="font-size: 0.9rem; color: #64748b;">Our average response time for technical inquiries is 24
+                    hours. Support is currently available in English.</p>
+            </div>
+
+            <div style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <h3 style="color: #E0E7FF; font-size: 1rem;">Legal & Support:</h3>
+                <div style="display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap;">
+                    <a href="/privacy.html"
+                        style="color: var(--primary); text-decoration: none; font-size: 0.85rem;">Privacy Policy</a>
+                    <a href="/terms.html"
+                        style="color: var(--primary); text-decoration: none; font-size: 0.85rem;">Terms of Service</a>
+                    <a href="/copyright.html"
+                        style="color: var(--primary); text-decoration: none; font-size: 0.85rem;">Copyright</a>
+                    <a href="/support-admin.html"
+                        style="color: #475569; text-decoration: none; font-size: 0.85rem; margin-left: auto;">Staff
+                        Login</a>
+                </div>
+                <p style="margin-top: 20px; font-size: 0.75rem; color: #475569; text-align: center;">&copy; 2026
+                    BeakBuddy AI. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

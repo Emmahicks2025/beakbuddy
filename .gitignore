@@ -1,0 +1,25 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+.DS_Store
+*.log
+
+# Environment & secrets — never upload these
+.env
+.env.*
+credentials.json
+beakbuddy-accee-firebase-adminsdk-*.json
+
+# Signing folder
+signing/
+
+# Large zip files
+*.zip

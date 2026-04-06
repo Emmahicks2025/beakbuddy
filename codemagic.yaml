@@ -56,7 +56,7 @@ workflows:
             CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
             -allowProvisioningUpdates \
-            -authenticationKeyPath /tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+            -authenticationKeyPath /tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8 \
             -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
 
@@ -85,7 +85,7 @@ workflows:
             -exportPath "$CM_BUILD_DIR/output" \
             -exportOptionsPlist /tmp/ExportOptions.plist \
             -allowProvisioningUpdates \
-            -authenticationKeyPath /tmp/authkeys \
+            -authenticationKeyPath /tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8 \
             -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
 

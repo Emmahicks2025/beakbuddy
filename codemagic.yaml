@@ -8,8 +8,6 @@ workflows:
       app_store_connect: Codemagic
 
     environment:
-      groups:
-        - ios_signing_creds
       vars:
         BUNDLE_ID: "com.beakbuddy.app"
         XCODE_SCHEME: "beakbuddy"
@@ -28,42 +26,71 @@ workflows:
         script: |
           npm ci
 
-      - name: Run Expo Prebuild (generates iOS native project)
+      - name: Run Expo Prebuild
         script: |
           npx expo prebuild --platform ios --clean --no-install
 
       - name: Patch Podfile for Firebase compatibility
         script: |
           sed -i '' "s/  use_expo_modules!/  use_modular_headers!\n  use_expo_modules!/" ios/Podfile
-          echo "Podfile patched — use_modular_headers added"
 
       - name: Install CocoaPods dependencies
         script: |
           cd ios && pod install --repo-update
 
-      - name: Set up code signing
+      - name: Write API key to file for Xcode signing
         script: |
-          # Install provisioning profile
-          PROFILE_UUID=$(security cms -D -i "$PROV_PROFILE" | grep -A1 UUID | grep string | sed 's/.*<string>\(.*\)<\/string>/\1/')
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp "$PROV_PROFILE" ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
-          echo "Installed profile: $PROFILE_UUID"
+          mkdir -p /tmp/authkeys
+          echo -n "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+          echo "API key written to /tmp/authkeys/"
 
-          # Initialize keychain and import certificate
-          keychain initialize
-          keychain add-certificates --certificate "$DIST_CERT" --certificate-password "$CERT_PASSWORD"
-
-          # Configure Xcode project to use the installed profile
-          xcode-project use-profiles
-
-      - name: Build iOS .ipa for App Store
+      - name: Build iOS Archive (Xcode handles signing automatically)
         script: |
-          xcode-project build-ipa \
-            --workspace "ios/beakbuddy.xcworkspace" \
-            --scheme "$XCODE_SCHEME"
+          xcodebuild \
+            -workspace ios/beakbuddy.xcworkspace \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
+            clean archive \
+            CODE_SIGN_STYLE=Automatic \
+            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath /tmp/authkeys \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+
+      - name: Export IPA
+        script: |
+          cat > /tmp/ExportOptions.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>destination</key>
+              <string>export</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>teamID</key>
+              <string>LZ57VL6474</string>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
+            -exportPath "$CM_BUILD_DIR/output" \
+            -exportOptionsPlist /tmp/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath /tmp/authkeys \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
 
     artifacts:
-      - build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/output/*.ipa
       - /tmp/xcodebuild_logs/*.log
 
     publishing:

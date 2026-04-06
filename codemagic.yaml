@@ -8,9 +8,6 @@ workflows:
       app_store_connect: Codemagic
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.beakbuddy.app
       vars:
         BUNDLE_ID: "com.beakbuddy.app"
         XCODE_SCHEME: "BeakBuddyParrotTrainingAI"
@@ -49,8 +46,32 @@ workflows:
         script: |
           cd ios && pod install --repo-update
 
-      - name: Apply code signing profiles
+      - name: Set up code signing
         script: |
+          # Generate RSA key using macOS LibreSSL (produces PKCS#1 format = valid for codemagic-cli-tools)
+          openssl genrsa 2048 -out /tmp/cert_key.pem
+          echo "Key format: $(head -1 /tmp/cert_key.pem)"
+          openssl rsa -in /tmp/cert_key.pem -check -noout && echo "Key is valid ✓"
+
+          keychain initialize
+
+          # Delete any existing Distribution certs to avoid 409 conflicts
+          app-store-connect certificates list --type DISTRIBUTION 2>/dev/null \
+            | grep -oE '^[A-Z0-9]{8,}' \
+            | while read CERT_ID; do
+                app-store-connect certificates delete "$CERT_ID" 2>/dev/null && echo "Deleted cert $CERT_ID" || true
+              done || true
+
+          # Create App Store Distribution cert + provisioning profile
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --platform IOS \
+            --type IOS_APP_STORE \
+            --create \
+            --certificate-key @file:/tmp/cert_key.pem
+
+          keychain add-certificates
+
+          # Apply profiles to Xcode project (sets CODE_SIGN_STYLE=Manual automatically)
           xcode-project use-profiles
 
       - name: Build iOS Archive

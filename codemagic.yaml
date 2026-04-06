@@ -40,8 +40,17 @@ workflows:
 
       - name: Patch Podfile for Firebase compatibility
         script: |
-          python3 -c "f='ios/Podfile'; t=open(f).read(); open(f,'w').write(t.replace('use_expo_modules!','use_modular_headers!\n  use_expo_modules!',1) if 'use_modular_headers!' not in t else t)"
-          grep -n 'use_modular_headers\|use_expo_modules' ios/Podfile || echo "WARNING: pattern not found in Podfile"
+          # Insert use_modular_headers! at ROOT LEVEL (after prepare_react_native_project!)
+          # Root-level placement ensures ALL pods (including React-RCTAppDelegate) get modular headers
+          python3 -c "\
+f='ios/Podfile'; t=open(f).read(); \
+open(f,'w').write(\
+  t.replace('prepare_react_native_project!','prepare_react_native_project!\nuse_modular_headers!',1) \
+  if 'use_modular_headers!' not in t and 'prepare_react_native_project!' in t \
+  else (t.replace('target ','use_modular_headers!\n\ntarget ',1) if 'use_modular_headers!' not in t else t))\
+"
+          echo "--- Podfile patch check ---"
+          grep -n 'use_modular_headers\|prepare_react_native' ios/Podfile || echo 'WARNING: patterns not found'
 
       - name: Install CocoaPods dependencies
         script: |
@@ -93,12 +102,14 @@ workflows:
           PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
           echo "Using workspace: $WORKSPACE"
           echo "Using profile UUID: $PROFILE_UUID"
+          # Use explicit derivedDataPath to avoid stale build cache between runs
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
             -configuration Release \
             -sdk iphoneos \
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
+            -derivedDataPath /tmp/xcode-dd \
             clean archive \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \

@@ -40,17 +40,8 @@ workflows:
 
       - name: Patch Podfile for Firebase compatibility
         script: |
-          # Insert use_modular_headers! at ROOT LEVEL (after prepare_react_native_project!)
-          # Root-level placement ensures ALL pods (including React-RCTAppDelegate) get modular headers
-          python3 -c "\
-f='ios/Podfile'; t=open(f).read(); \
-open(f,'w').write(\
-  t.replace('prepare_react_native_project!','prepare_react_native_project!\nuse_modular_headers!',1) \
-  if 'use_modular_headers!' not in t and 'prepare_react_native_project!' in t \
-  else (t.replace('target ','use_modular_headers!\n\ntarget ',1) if 'use_modular_headers!' not in t else t))\
-"
-          echo "--- Podfile patch check ---"
-          grep -n 'use_modular_headers\|prepare_react_native' ios/Podfile || echo 'WARNING: patterns not found'
+          python3 -c "f='ios/Podfile'; t=open(f).read(); open(f,'w').write(t.replace('prepare_react_native_project!','prepare_react_native_project!\nuse_modular_headers!',1) if 'use_modular_headers!' not in t and 'prepare_react_native_project!' in t else (t.replace('target ','use_modular_headers!\n\ntarget ',1) if 'use_modular_headers!' not in t else t))"
+          grep -n 'use_modular_headers\|prepare_react_native' ios/Podfile || echo 'WARNING: pattern not found'
 
       - name: Install CocoaPods dependencies
         script: |

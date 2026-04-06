@@ -98,7 +98,11 @@ workflows:
 
       - name: Export IPA
         script: |
-          python3 -c "import plistlib; p={'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'manual','destination':'export'}; plistlib.dump(p,open('/tmp/ExportOptions.plist','wb'),fmt=plistlib.FMT_XML); print('ExportOptions.plist written')"
+          PROFILE=$(find "$HOME/Library/MobileDevice/Provisioning Profiles" -name "*.mobileprovision" 2>/dev/null | head -1)
+          UUID=$(security cms -D -i "$PROFILE" | python3 -c "import sys,plistlib; print(plistlib.loads(sys.stdin.buffer.read())['UUID'])")
+          python3 -c "import plistlib; p={'method':'app-store','teamID':'$DEVELOPMENT_TEAM','signingStyle':'manual','provisioningProfiles':{'$BUNDLE_ID':'$UUID'}}; plistlib.dump(p,open('/tmp/ExportOptions.plist','wb'),fmt=plistlib.FMT_XML)"
+          echo '=== ExportOptions.plist ==='
+          cat /tmp/ExportOptions.plist
           xcodebuild \
             -exportArchive \
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \

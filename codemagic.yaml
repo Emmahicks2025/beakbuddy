@@ -56,22 +56,22 @@ workflows:
             --certificate-key @file:/tmp/cert_key.pem
 
           keychain add-certificates
-          xcode-project use-profiles || true
+          # node_modules is no longer needed after pod install.
+          # Removing it prevents use-profiles from crashing on
+          # node_modules/@react-native-community/datetimepicker/ios/
+          rm -rf node_modules
+          xcode-project use-profiles
 
       - name: Build and export IPA
         script: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
           echo "Using workspace: $WORKSPACE"
-
-          # One-liner avoids heredoc YAML indentation issues entirely
-          python3 -c "import plistlib; plistlib.dump({'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'manual'}, open('/tmp/export_options.plist','wb'))"
-          echo "export_options.plist written"
-
+          # use-profiles already wrote ~/export_options.plist — no need to
+          # create one manually or pass --export-options-plist
           xcode-project build-ipa \
             --workspace "$WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
-            --config Release \
-            --export-options-plist /tmp/export_options.plist
+            --config Release
 
     artifacts:
       - build/ios/ipa/*.ipa

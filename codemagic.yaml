@@ -5,7 +5,7 @@ workflows:
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: Codemagic  # Name of the API key you add in Codemagic dashboard
+      app_store_connect: Codemagic
 
     environment:
       ios_signing:
@@ -49,11 +49,13 @@ workflows:
     publishing:
       app_store_connect:
         api_key: Codemagic
-        submit_to_testflight: true   # Goes to TestFlight first for safety
-        submit_to_app_store: false   # Change to true when ready to go live
+        key_id: 9T452HQ663
+        issuer_id: 4f61e329-5610-4780-9bf0-04ab901312c7
+        submit_to_testflight: true
+        submit_to_app_store: false
       email:
         recipients:
-          - your-email@example.com   # Replace with your email to get notified
+          - emmahicks2022@gmail.com
         notify:
           success: true
           failure: true

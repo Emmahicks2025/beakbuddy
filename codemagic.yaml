@@ -5,7 +5,7 @@ workflows:
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: Codemagic
+      app_store_connect: Codemagic   # Uses the API key already saved in team settings
 
     environment:
       vars:
@@ -38,28 +38,20 @@ workflows:
         script: |
           cd ios && pod install --repo-update
 
-      - name: Set up manual code signing
+      - name: Set up automatic code signing
         script: |
-          # ── Decode distribution certificate and install into keychain ──
-          echo -n "$DIST_CERT_B64" | base64 --decode > /tmp/cert.p12
-
-          # ── Decode provisioning profile and install ──
-          echo -n "$PROV_PROFILE_B64" | base64 --decode > /tmp/profile.mobileprovision
-          UUID=$(security cms -D -i /tmp/profile.mobileprovision | \
-            grep -A1 UUID | grep string | \
-            sed 's/.*<string>\(.*\)<\/string>/\1/')
-          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          cp /tmp/profile.mobileprovision \
-            "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
-          echo "Installed provisioning profile UUID: $UUID"
-
-          # ── Initialize keychain and import certificate ──
+          # Codemagic fetches/creates the cert + profile automatically using
+          # the App Store Connect API key ("Codemagic") already in team settings.
+          # No manual downloads. No base64. It handles rotation too.
           keychain initialize
-          keychain add-certificates \
-            --certificate /tmp/cert.p12 \
-            --certificate-password "$CERT_PASSWORD"
 
-          # ── Tell Codemagic's xcode-project tooling to use the profile ──
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --platform IOS \
+            --type IOS_APP_STORE \
+            --create \
+            --certificate-key-password ""
+
+          keychain add-certificates
           xcode-project use-profiles
 
       - name: Build and export IPA

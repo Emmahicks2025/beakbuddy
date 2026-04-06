@@ -40,19 +40,23 @@ workflows:
 
       - name: Set up automatic code signing
         script: |
-          # Codemagic fetches/creates the cert + profile automatically using
-          # the App Store Connect API key ("Codemagic") already in team settings.
-          # No manual downloads. No base64. It handles rotation too.
+          # Generate a fresh RSA private key for the distribution certificate.
+          # This sidesteps "Cannot save Signing Certificates without certificate
+          # private key" — instead of trying to reuse an existing cert whose
+          # private key isn't available, we supply our own key and --create
+          # makes a brand-new cert signed by it.
+          openssl genrsa -out /tmp/cert_key.pem 2048
+
           keychain initialize
 
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --platform IOS \
             --type IOS_APP_STORE \
-            --create
+            --create \
+            --certificate-key @file:/tmp/cert_key.pem
 
           keychain add-certificates
-          xcode-project use-profiles \
-            --workspace "ios/beakbuddy.xcworkspace"
+          xcode-project use-profiles
 
       - name: Build and export IPA
         script: |

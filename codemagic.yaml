@@ -56,15 +56,9 @@ workflows:
 
           keychain initialize
 
-          # Remove old distribution certs to avoid 409 conflicts
           app-store-connect list-certificates --type DISTRIBUTION --json 2>/dev/null \
-            | python3 -c "
-import json, sys, subprocess
-certs = json.load(sys.stdin).get('data', [])
-for c in certs:
-    subprocess.run(['app-store-connect', 'delete-certificate', c['id']])
-print(f'Deleted {len(certs)} old cert(s)')
-" || true
+            | python3 -c "import json,sys,subprocess; [subprocess.run(['app-store-connect','delete-certificate',c['id']]) for c in json.load(sys.stdin).get('data',[])]" \
+            || true
 
           # Fetch / create App Store signing files (Distribution cert + App Store profile)
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
@@ -115,17 +109,8 @@ print(f'Deleted {len(certs)} old cert(s)')
           PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
           echo "Using profile UUID: $PROFILE_UUID"
 
-          python3 -c "
-import plistlib
-opts = {
-    'method': 'app-store-connect',
-    'teamID': 'LZ57VL6474',
-    'signingStyle': 'manual',
-    'provisioningProfiles': {'com.beakbuddy.app': '$PROFILE_UUID'}
-}
-plistlib.dump(opts, open('/tmp/ExportOptions.plist','wb'), fmt=plistlib.FMT_XML)
-print('ExportOptions.plist written')
-"
+          # Write ExportOptions.plist — reads profile UUID from file (avoids shell-in-Python quoting)
+          python3 -c "import plistlib; u=open('/tmp/profile_uuid.txt').read().strip(); p={'method':'app-store-connect','teamID':'LZ57VL6474','signingStyle':'manual','provisioningProfiles':{'com.beakbuddy.app':u}}; plistlib.dump(p,open('/tmp/ExportOptions.plist','wb'),fmt=plistlib.FMT_XML); print('plist written, profile UUID:',u)"
 
           xcodebuild \
             -exportArchive \

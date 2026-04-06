@@ -48,21 +48,21 @@ workflows:
 
       - name: Set up code signing
         script: |
-          # Generate RSA key using macOS LibreSSL (produces PKCS#1 format = valid for codemagic-cli-tools)
-          openssl genrsa 2048 -out /tmp/cert_key.pem
+          # macOS LibreSSL syntax: bits come LAST
+          openssl genrsa -out /tmp/cert_key.pem 2048
           echo "Key format: $(head -1 /tmp/cert_key.pem)"
           openssl rsa -in /tmp/cert_key.pem -check -noout && echo "Key is valid ✓"
 
           keychain initialize
 
-          # Delete any existing Distribution certs to avoid 409 conflicts
+          # Delete any existing Distribution certs to avoid 409 on future builds
           app-store-connect certificates list --type DISTRIBUTION 2>/dev/null \
             | grep -oE '^[A-Z0-9]{8,}' \
             | while read CERT_ID; do
                 app-store-connect certificates delete "$CERT_ID" 2>/dev/null && echo "Deleted cert $CERT_ID" || true
               done || true
 
-          # Create App Store Distribution cert + provisioning profile
+          # Create Distribution cert + App Store provisioning profile
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --platform IOS \
             --type IOS_APP_STORE \
@@ -71,13 +71,27 @@ workflows:
 
           keychain add-certificates
 
-          # Apply profiles to Xcode project (sets CODE_SIGN_STYLE=Manual automatically)
-          xcode-project use-profiles
+          # Extract profile UUID for explicit manual signing (avoids node_modules xcodeproj issues)
+          PROFILE=$(find "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
+                    "$HOME/Library/MobileDevice/Provisioning Profiles" \
+                    -name "*.mobileprovision" 2>/dev/null | head -1)
+          if [ -z "$PROFILE" ]; then
+            echo "ERROR: No provisioning profile found"
+            exit 1
+          fi
+          UUID=$(security cms -D -i "$PROFILE" \
+                 | python3 -c "import sys,plistlib; print(plistlib.loads(sys.stdin.buffer.read())['UUID'])")
+          echo "Profile UUID: $UUID"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
+          echo "$UUID" > /tmp/profile_uuid.txt
 
       - name: Build iOS Archive
         script: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -1)
+          PROFILE_UUID=$(cat /tmp/profile_uuid.txt)
           echo "Using workspace: $WORKSPACE"
+          echo "Using profile UUID: $PROFILE_UUID"
           xcodebuild \
             -workspace "$WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
@@ -85,6 +99,9 @@ workflows:
             -sdk iphoneos \
             -archivePath "$CM_BUILD_DIR/beakbuddy.xcarchive" \
             clean archive \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE="$PROFILE_UUID" \
             DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM"
 
       - name: Export IPA

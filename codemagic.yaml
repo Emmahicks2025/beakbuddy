@@ -40,7 +40,8 @@ workflows:
 
       - name: Patch Podfile for Firebase compatibility
         script: |
-          sed -i '' "s/  use_expo_modules!/  use_modular_headers!\n  use_expo_modules!/" ios/Podfile
+          python3 -c "f='ios/Podfile'; t=open(f).read(); open(f,'w').write(t.replace('use_expo_modules!','use_modular_headers!\n  use_expo_modules!',1) if 'use_modular_headers!' not in t else t)"
+          grep -n 'use_modular_headers\|use_expo_modules' ios/Podfile || echo "WARNING: pattern not found in Podfile"
 
       - name: Install CocoaPods dependencies
         script: |

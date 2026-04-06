@@ -29,9 +29,16 @@ workflows:
         script: |
           npx expo prebuild --platform ios --clean --no-install
 
+      - name: Patch Podfile for Firebase compatibility
+        script: |
+          # Firebase Swift pods require modular headers
+          sed -i '' "s/  use_expo_modules!/  use_modular_headers!\n  use_expo_modules!/" ios/Podfile
+          echo "Podfile patched successfully"
+          grep -n "use_modular_headers" ios/Podfile
+
       - name: Install CocoaPods dependencies
         script: |
-          cd ios && pod install
+          cd ios && pod install --repo-update
 
       - name: Set up keychain
         script: |

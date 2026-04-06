@@ -50,14 +50,21 @@ workflows:
 
       - name: Write App Store Connect API key for Xcode
         script: |
-          # Expose the API key as a .p8 file so xcodebuild can use it
-          # for automatic signing (-authenticationKeyPath).
-          # APP_STORE_CONNECT_PRIVATE_KEY / KEY_IDENTIFIER / ISSUER_ID
-          # are injected automatically by the Codemagic integration.
           mkdir -p /tmp/authkeys
-          echo -n "$APP_STORE_CONNECT_PRIVATE_KEY" \
-            > /tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
-          echo "API key written to /tmp/authkeys/"
+          KEY_PATH="/tmp/authkeys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8"
+
+          # APP_STORE_CONNECT_PRIVATE_KEY from Codemagic's integration is base64-encoded.
+          # Detect to handle both raw PEM (contains "BEGIN") and base64 formats.
+          if echo "$APP_STORE_CONNECT_PRIVATE_KEY" | grep -q "BEGIN"; then
+            echo "Key is raw PEM — writing directly"
+            printf '%s\n' "$APP_STORE_CONNECT_PRIVATE_KEY" > "$KEY_PATH"
+          else
+            echo "Key is base64-encoded — decoding"
+            echo -n "$APP_STORE_CONNECT_PRIVATE_KEY" | base64 --decode > "$KEY_PATH"
+          fi
+
+          echo "First line of key file: $(head -1 $KEY_PATH)"
+          echo "Key file size: $(wc -c < $KEY_PATH) bytes"
 
       - name: Build iOS Archive
         script: |

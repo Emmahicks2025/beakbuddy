@@ -40,7 +40,7 @@ export const SUBSCRIPTION_TIERS: Record<string, SubscriptionProduct> = {
         description: 'Popular choice'
     },
     yearly: {
-        iosId: 'beakbuddy_yearly_2499',
+        iosId: 'cakbuddy_yearly_2499',
         androidId: 'parrot_yearly',
         tier: 'yearly',
         displayName: 'Yearly',

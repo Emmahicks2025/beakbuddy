@@ -28,6 +28,13 @@ workflows:
         script: |
           npm ci
 
+      - name: Inject Environment Variables
+        script: |
+          echo "EXPO_PUBLIC_GEMINI_API_KEY=$EXPO_PUBLIC_GEMINI_API_KEY" >> .env
+          echo "EXPO_PUBLIC_FIREBASE_API_KEY=$EXPO_PUBLIC_FIREBASE_API_KEY" >> .env
+          echo "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=$EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID" >> .env
+          echo "Variables successfully injected into .env for Metro Bundler"
+
       - name: Run Expo Prebuild
         script: |
           npx expo prebuild --platform ios --clean --no-install

@@ -11,14 +11,14 @@ import { SubscriptionStatus, SUBSCRIPTION_TIERS, SubscriptionTier } from '../typ
 
 const itemSkus = Platform.select({
     ios: [
-        SUBSCRIPTION_TIERS.monthly.id,
-        SUBSCRIPTION_TIERS.six_month.id,
-        SUBSCRIPTION_TIERS.yearly.id,
+        SUBSCRIPTION_TIERS.monthly.iosId,
+        SUBSCRIPTION_TIERS.six_month.iosId,
+        SUBSCRIPTION_TIERS.yearly.iosId,
     ],
     android: [
-        SUBSCRIPTION_TIERS.monthly.id,
-        SUBSCRIPTION_TIERS.six_month.id,
-        SUBSCRIPTION_TIERS.yearly.id,
+        SUBSCRIPTION_TIERS.monthly.androidId,
+        SUBSCRIPTION_TIERS.six_month.androidId,
+        SUBSCRIPTION_TIERS.yearly.androidId,
     ],
     default: [],
 });
@@ -48,7 +48,7 @@ class SubscriptionService {
             // console.log('SubscriptionService: Got products', subscriptions.length);
 
             const availablePackages = subscriptions.map((sub: Subscription) => {
-                const tier = Object.values(SUBSCRIPTION_TIERS).find(t => t.id === sub.productId);
+                const tier = Object.values(SUBSCRIPTION_TIERS).find(t => t.iosId === sub.productId || t.androidId === sub.productId);
                 return {
                     identifier: sub.productId,
                     product: {

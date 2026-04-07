@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import auth, { GoogleAuthProvider } from '@react-native-firebase/auth';
@@ -36,6 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('🔵 Configuring Google Sign-In...');
         GoogleSignin.configure({
             webClientId: "337832765264-8t7dmf1gahnfo7oqt510eib973ctnlp2.apps.googleusercontent.com", // Hardcoded for debugging
+            iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID, // Needs to be set in Codemagic or .env
             scopes: ['email', 'profile'],
             offlineAccess: true,
             forceCodeForRefreshToken: true,
@@ -92,9 +93,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // console.log('🔵 Authenticating with Google...');
             console.log('🔵 Authenticating with Google...');
 
-            // Checks if play services are available
-            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            console.log('✅ Google Play Services available');
+            // Checks if play services are available (Android only)
+            if (Platform.OS === 'android') {
+                await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+                console.log('✅ Google Play Services available');
+            }
 
             // Get user ID token
             const signInResult = await GoogleSignin.signIn();
@@ -112,14 +115,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 throw new Error('No ID token received from Google Sign-In response: ' + JSON.stringify(signInResult));
             }
 
-            // WORKAROUND: Manually create credential object to bypass GoogleAuthProvider issues
-            // This is what GoogleAuthProvider.credential() does internally
-            const googleCredential: any = {
-                token: idToken,
-                secret: null,
-                providerId: 'google.com'
-            };
-            console.error('✅ Firebase credential created manually:', googleCredential);
+            // Use native GoogleAuthProvider credential
+            const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+            console.error('✅ Firebase credential created natively');
 
             // Sign in with credential
             const userCredential = await auth().signInWithCredential(googleCredential);

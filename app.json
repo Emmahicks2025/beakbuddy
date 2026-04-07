@@ -23,7 +23,14 @@
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow BeakBuddy to access your microphone for parrot training sessions.",
         "NSCameraUsageDescription": "Allow BeakBuddy to access your camera to scan food items.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.15460675966-dbcoafo2h8n1be48u3kll9kp5cfr9ok5"
+            ]
+          }
+        ]
       }
     },
     "android": {

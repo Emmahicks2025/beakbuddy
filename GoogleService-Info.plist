@@ -2,18 +2,22 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>15460675966-dbcoafo2h8n1be48u3kll9kp5cfr9ok5.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.15460675966-dbcoafo2h8n1be48u3kll9kp5cfr9ok5</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBWC2pgbz1iEQbzpZmDxYGH5UTANoG0XT0</string>
+	<string>AIzaSyAR358ih2f3iH_YwL9XMnpB7q-iCauhJto</string>
 	<key>GCM_SENDER_ID</key>
-	<string>452578545648</string>
+	<string>15460675966</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.beakbuddy.app</string>
 	<key>PROJECT_ID</key>
-	<string>beakbuddy-accee</string>
+	<string>beakbuddy-march2026</string>
 	<key>STORAGE_BUCKET</key>
-	<string>beakbuddy-accee.firebasestorage.app</string>
+	<string>beakbuddy-march2026.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:452578545648:ios:a87a26814f1dd73b701735</string>
+	<string>1:15460675966:ios:4ae864e4d28804daf6c32f</string>
 </dict>
 </plist>

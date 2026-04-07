@@ -15,7 +15,7 @@ workflows:
         XCODE_SCHEME: "BeakBuddyParrotTrainingAI"
         DEVELOPMENT_TEAM: "LZ57VL6474"
       node: 18.17.0
-      xcode: 16.2
+      xcode: latest
       cocoapods: default
 
     cache:

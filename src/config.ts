@@ -1,11 +1,12 @@
 /**
- * Central Configuration for Parrot App
- * ensuring reliable access to API keys in production builds.
+ * Central Configuration for BeakBuddy
+ * Keys are physically written into env.generated.ts by Codemagic at build time.
+ * A stub file exists locally so the import never fails during development.
  */
+import { ENV } from './env.generated';
 
 export const Config = {
-    // Dynamically sourced from Codemagic Environment Variables
-    GEMINI_API_KEY: process.env.EXPO_PUBLIC_GEMINI_API_KEY,
-    FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-    GOOGLE_WEB_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    GEMINI_API_KEY: ENV.GEMINI_API_KEY,
+    FIREBASE_API_KEY: ENV.FIREBASE_API_KEY,
+    GOOGLE_WEB_CLIENT_ID: ENV.GOOGLE_WEB_CLIENT_ID,
 };

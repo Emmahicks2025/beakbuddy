@@ -10,6 +10,11 @@ import { Platform } from 'react-native';
 import { SubscriptionStatus, SUBSCRIPTION_TIERS, SubscriptionTier } from '../types/subscription';
 
 const itemSkus = Platform.select({
+    ios: [
+        SUBSCRIPTION_TIERS.monthly.id,
+        SUBSCRIPTION_TIERS.six_month.id,
+        SUBSCRIPTION_TIERS.yearly.id,
+    ],
     android: [
         SUBSCRIPTION_TIERS.monthly.id,
         SUBSCRIPTION_TIERS.six_month.id,

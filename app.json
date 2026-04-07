@@ -19,6 +19,7 @@
       "bundleIdentifier": "com.beakbuddy.app",
       "buildNumber": "21",
       "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow BeakBuddy to access your microphone for parrot training sessions.",
         "NSCameraUsageDescription": "Allow BeakBuddy to access your camera to scan food items.",
@@ -31,6 +32,7 @@
         "backgroundColor": "#0F172A"
       },
       "package": "com.beakbuddy.app",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"

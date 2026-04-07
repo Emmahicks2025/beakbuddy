@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Configure Google Sign-In
         console.error('🔵 Configuring Google Sign-In...');
         GoogleSignin.configure({
-            webClientId: "337832765264-8t7dmf1gahnfo7oqt510eib973ctnlp2.apps.googleusercontent.com", // Hardcoded for debugging
+            webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID, // Use the new project ID dynamically
             iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID, // Needs to be set in Codemagic or .env
             scopes: ['email', 'profile'],
             offlineAccess: true,

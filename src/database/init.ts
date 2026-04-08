@@ -210,6 +210,18 @@ const migrateDatabase = async (
         });
     }
 
+    if (fromVersion < 6) {
+        console.log('Migrating to v6: Adding reminderTime and streak to care_task...');
+        try {
+            await database.execAsync(`
+                ALTER TABLE care_task ADD COLUMN reminderTime TEXT;
+                ALTER TABLE care_task ADD COLUMN streak INTEGER DEFAULT 0;
+            `);
+        } catch (e) {
+            console.warn('Migration to v6 columns might have already happened or failed', e);
+        }
+    }
+
     // Update version
     await database.runAsync(
         'UPDATE app_metadata SET value = ? WHERE key = ?',

@@ -1,7 +1,7 @@
 // SQLite database schema for BeakBuddy
 
 export const DB_NAME = 'parrot_master.db';
-export const DB_VERSION = 5;
+export const DB_VERSION = 6;
 
 export const createTablesSQL = `
 -- Species table
@@ -97,6 +97,8 @@ CREATE TABLE IF NOT EXISTS care_task (
   schedule TEXT NOT NULL,
   isDone INTEGER NOT NULL DEFAULT 0,
   lastDoneAt INTEGER,
+  reminderTime TEXT,
+  streak INTEGER DEFAULT 0,
   FOREIGN KEY (profileId) REFERENCES parrot_profile(id)
 );
 

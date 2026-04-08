@@ -28,21 +28,6 @@ workflows:
         script: |
           npm ci
 
-      - name: Inject Environment Variables
-        script: |
-          python3 - << 'PYEOF'
-          import os, sys
-          gemini = os.environ.get('EXPO_PUBLIC_GEMINI_API_KEY', '')
-          firebase = os.environ.get('EXPO_PUBLIC_FIREBASE_API_KEY', '')
-          google = os.environ.get('EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID', '')
-          if not gemini:
-              print('FATAL: EXPO_PUBLIC_GEMINI_API_KEY is empty. Check Codemagic env group.')
-              sys.exit(1)
-          content = 'export const ENV = {\n  GEMINI_API_KEY: "' + gemini + '",\n  FIREBASE_API_KEY: "' + firebase + '",\n  GOOGLE_WEB_CLIENT_ID: "' + google + '",\n};\n'
-          open('src/env.generated.ts', 'w').write(content)
-          print('env.generated.ts written. Key starts with: ' + gemini[:8] + '...')
-          PYEOF
-
       - name: Run Expo Prebuild
         script: |
           npx expo prebuild --platform ios --clean --no-install

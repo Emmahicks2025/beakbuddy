@@ -528,7 +528,7 @@ const CareTab: React.FC = () => {
 
                     {activeTab === 'diet' && (
                         <>
-                            <Text style={[theme.typography.h2, { color: theme.colors.text, marginBottom: 16 }]}>Food Safety & Diet</Text>
+                            <Text style={[theme.typography.h2, { color: theme.colors.text, marginBottom: 16 }]}>{'Food Safety & Diet'}</Text>
                             <FoodLookup onSelect={(item) => {
                                 if (item.verdict === 'TOXIC') {
                                     AlertService.alert('Warning', `${item.name} is toxic!`);

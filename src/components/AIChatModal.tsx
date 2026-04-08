@@ -113,7 +113,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ visible, onClose, cont
                                     <Text style={[theme.typography.h3, { color: '#FFF', fontSize: 18, fontWeight: '700' }]}>
                                         Parrot Assistant
                                     </Text>
-                                    <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }}>Online & Ready to help</Text>
+                                    <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }}>{'Online & Ready to help'}</Text>
                                 </View>
                             </View>
                             <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>

@@ -1,12 +1,19 @@
 /**
  * Central Configuration for BeakBuddy
- * Keys are physically written into env.generated.ts by Codemagic at build time.
- * A stub file exists locally so the import never fails during development.
+ * Gemini API key is fetched live from Firebase Remote Config.
+ * Update the key in Firebase Console — no app rebuild needed ever.
  */
+import { getGeminiApiKey } from './services/remoteConfig';
 import { ENV } from './env.generated';
 
 export const Config = {
-    GEMINI_API_KEY: ENV.GEMINI_API_KEY,
+    /**
+     * Returns the Gemini key from Remote Config (or hardcoded fallback).
+     * initRemoteConfig() must be called at app startup for the live key.
+     */
+    get GEMINI_API_KEY() {
+        return getGeminiApiKey();
+    },
     FIREBASE_API_KEY: ENV.FIREBASE_API_KEY,
     GOOGLE_WEB_CLIENT_ID: ENV.GOOGLE_WEB_CLIENT_ID,
 };

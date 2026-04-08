@@ -17,7 +17,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.beakbuddy.app",
-      "buildNumber": "41",
+      "buildNumber": "42",
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
@@ -58,6 +58,7 @@
       "@react-native-community/datetimepicker",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      "@react-native-firebase/remote-config",
       "@react-native-google-signin/google-signin",
       "react-native-iap"
     ],

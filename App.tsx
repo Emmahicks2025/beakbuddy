@@ -11,6 +11,7 @@ import { ProfileRepository } from './src/database/repository';
 import SubscriptionService from './src/services/subscriptionService';
 import { AuthProvider } from './src/context/AuthContext';
 import { CustomSplashScreen } from './src/components/CustomSplashScreen';
+import { initRemoteConfig } from './src/services/remoteConfig';
 
 // Import global CSS for web platform
 if (Platform.OS === 'web') {
@@ -99,6 +100,8 @@ function AppContent() {
                 const promises: Promise<any>[] = [];
                 // console.log('🔄 Starting Subscription Service...');
                 promises.push(SubscriptionService.initialize());
+                // Fetch live Gemini API key from Firebase Remote Config
+                promises.push(initRemoteConfig());
 
                 if (Platform.OS !== 'web') {
                     // console.log('🔄 Starting Database Service...');

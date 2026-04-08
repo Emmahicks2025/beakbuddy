@@ -701,36 +701,36 @@ const CareTab: React.FC = () => {
                     <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
                         <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 }]}>
                             <Card>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                            <Text style={theme.typography.h2}>Log Meal</Text>
-                            <TouchableOpacity onPress={() => setActiveModal(null)}>
-                                <Text style={{ fontSize: 24, color: theme.colors.text }}>✕</Text>
-                            </TouchableOpacity>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                                    <Text style={theme.typography.h2}>Log Meal</Text>
+                                    <TouchableOpacity onPress={() => setActiveModal(null)}>
+                                        <Text style={{ fontSize: 24, color: theme.colors.text }}>✕</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <Text style={[theme.typography.bodySmall, { color: theme.colors.textSecondary, marginBottom: 8 }]}>Food Items (comma separated)</Text>
+                                <TextInput
+                                    style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
+                                    value={newMealItems}
+                                    onChangeText={setNewMealItems}
+                                    placeholder="e.g. Apple, Pellets"
+                                    placeholderTextColor={theme.colors.textSecondary}
+                                />
+
+                                <Text style={[theme.typography.bodySmall, { color: theme.colors.textSecondary, marginBottom: 8 }]}>Notes</Text>
+                                <TextInput
+                                    style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
+                                    value={newMealNotes}
+                                    onChangeText={setNewMealNotes}
+                                    placeholder="Optional notes..."
+                                    placeholderTextColor={theme.colors.textSecondary}
+                                />
+
+                                <Button title="Save Log" onPress={handleLogMeal} />
+                            </Card>
                         </View>
-
-                        <Text style={[theme.typography.bodySmall, { color: theme.colors.textSecondary, marginBottom: 8 }]}>Food Items (comma separated)</Text>
-                        <TextInput
-                            style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
-                            value={newMealItems}
-                            onChangeText={setNewMealItems}
-                            placeholder="e.g. Apple, Pellets"
-                            placeholderTextColor={theme.colors.textSecondary}
-                        />
-
-                        <Text style={[theme.typography.bodySmall, { color: theme.colors.textSecondary, marginBottom: 8 }]}>Notes</Text>
-                        <TextInput
-                            style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
-                            value={newMealNotes}
-                            onChangeText={setNewMealNotes}
-                            placeholder="Optional notes..."
-                            placeholderTextColor={theme.colors.textSecondary}
-                        />
-
-                            <Button title="Save Log" onPress={handleLogMeal} />
-                        </Card>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </Modal>
 
             {/* Task Form Modal */}
@@ -744,43 +744,43 @@ const CareTab: React.FC = () => {
                     <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
                         <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 }]}>
                             <Card>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                            <Text style={theme.typography.h2}>Add Task</Text>
-                            <TouchableOpacity onPress={() => setActiveModal(null)}>
-                                <Text style={{ fontSize: 24, color: theme.colors.text }}>✕</Text>
-                            </TouchableOpacity>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                                    <Text style={theme.typography.h2}>Add Task</Text>
+                                    <TouchableOpacity onPress={() => setActiveModal(null)}>
+                                        <Text style={{ fontSize: 24, color: theme.colors.text }}>✕</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <TextInput
+                                    style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
+                                    value={newTaskTitle}
+                                    onChangeText={setNewTaskTitle}
+                                    placeholder="Task Title (e.g. Clean Cage)"
+                                    placeholderTextColor={theme.colors.textSecondary}
+                                />
+
+                                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+                                    {(['Daily', 'Weekly', 'Monthly'] as const).map(option => (
+                                        <TouchableOpacity
+                                            key={option}
+                                            onPress={() => setNewTaskSchedule(option)}
+                                            style={{
+                                                paddingHorizontal: 16,
+                                                paddingVertical: 8,
+                                                borderRadius: 20,
+                                                backgroundColor: newTaskSchedule === option ? theme.colors.brand.primary : 'rgba(255,255,255,0.1)',
+                                            }}
+                                        >
+                                            <Text style={{ color: newTaskSchedule === option ? '#FFF' : theme.colors.text }}>{option}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+
+                                <Button title="Create Task" onPress={handleAddTask} />
+                            </Card>
                         </View>
-
-                        <TextInput
-                            style={[styles.input, { color: theme.colors.text, borderColor: theme.colors.border }]}
-                            value={newTaskTitle}
-                            onChangeText={setNewTaskTitle}
-                            placeholder="Task Title (e.g. Clean Cage)"
-                            placeholderTextColor={theme.colors.textSecondary}
-                        />
-
-                        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-                            {(['Daily', 'Weekly', 'Monthly'] as const).map(option => (
-                                <TouchableOpacity
-                                    key={option}
-                                    onPress={() => setNewTaskSchedule(option)}
-                                    style={{
-                                        paddingHorizontal: 16,
-                                        paddingVertical: 8,
-                                        borderRadius: 20,
-                                        backgroundColor: newTaskSchedule === option ? theme.colors.brand.primary : 'rgba(255,255,255,0.1)',
-                                    }}
-                                >
-                                    <Text style={{ color: newTaskSchedule === option ? '#FFF' : theme.colors.text }}>{option}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                            <Button title="Create Task" onPress={handleAddTask} />
-                        </Card>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </Modal>
 
         </View>

@@ -17,6 +17,7 @@ web-build/
 .env.*
 credentials.json
 beakbuddy-accee-firebase-adminsdk-*.json
+src/env.generated.ts
 
 # Signing folder
 signing/

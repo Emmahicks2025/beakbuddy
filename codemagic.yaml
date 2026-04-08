@@ -28,6 +28,25 @@ workflows:
         script: |
           npm install --legacy-peer-deps
 
+      - name: Generate env.generated.ts from Codemagic secrets
+        script: |
+          python3 -c "
+          import os, sys
+          key = os.environ.get('GEMINI_API_KEY', '')
+          if not key:
+              print('FATAL: GEMINI_API_KEY not set in Codemagic environment variables')
+              sys.exit(1)
+          content = '''// AUTO-GENERATED at build time — gitignored, never committed.
+          export const ENV = {
+              GEMINI_API_KEY: \'''' + key + '''\',
+              FIREBASE_API_KEY: \'AIzaSyAR358ih2f3iH_YwL9XMnpB7q-iCauhJto\',
+              GOOGLE_WEB_CLIENT_ID: \'15460675966-dbcoafo2h8n1be48u3kll9kp5cfr9ok5.apps.googleusercontent.com\',
+          };
+          '''
+          open('src/env.generated.ts', 'w').write(content)
+          print('env.generated.ts written successfully. Key prefix: ' + key[:8])
+          "
+
       - name: Run Expo Prebuild
         script: |
           npx expo prebuild --platform ios --clean --no-install

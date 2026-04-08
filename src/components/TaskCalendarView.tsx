@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { AppDateTimePicker } from './AppDateTimePicker';
 import { CareTask, CareTaskHistory } from '../types';
-// Removed Ionicons for Web compatibility
 import { Card } from './Card';
 import { StatBadge } from './StatBadge';
 import { TaskItem } from './TaskItem';
@@ -28,55 +27,16 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskFrequency, setNewTaskFrequency] = useState<'Daily' | 'Weekly' | 'Monthly'>('Daily');
 
-    // Compute marked dates (productivity logic)
-    const markedDates = useMemo(() => {
-        const marks: any = {};
-        const dailyTaskCount = tasks.filter(t => t.schedule === 'Daily').length;
-
-        // Group history by date
-        const historyByDate: Record<string, number> = {};
-        history.forEach(h => {
-            historyByDate[h.date] = (historyByDate[h.date] || 0) + 1;
-        });
-
-        // Color logic
-        Object.keys(historyByDate).forEach(date => {
-            const count = historyByDate[date];
-            let color = theme.colors.brand.secondary; // Partial
-            if (dailyTaskCount > 0 && count >= dailyTaskCount) {
-                color = theme.colors.brand.safe; // Perfect day
-            }
-
-            marks[date] = {
-                selected: true,
-                selectedColor: color,
-                selectedTextColor: '#ffffff'
-            };
-        });
-
-        // Current selected override
-        marks[selectedDate] = {
-            ...marks[selectedDate],
-            selected: true,
-            selectedColor: theme.colors.brand.primary, // Highlight selected
-            selectedTextColor: '#ffffff'
-        };
-        return marks;
-    }, [history, selectedDate, theme, tasks]);
-
-    // Calculate current streak (consecutive days with at least 1 task)
     const currentStreak = useMemo(() => {
         let streak = 0;
         const today = new Date();
-        // Check backwards from yesterday
         for (let i = 0; i < 365; i++) {
             const d = new Date();
             d.setDate(today.getDate() - i);
             const dateStr = d.toISOString().split('T')[0];
-
             const hasLog = history.some(h => h.date === dateStr);
             if (hasLog) streak++;
-            else if (i === 0) continue; // Allow today to not be done yet without breaking streak
+            else if (i === 0) continue;
             else break;
         }
         return streak;
@@ -86,7 +46,6 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
         const existingLog = history.find(h => h.taskId === task.id && h.date === selectedDate);
         const now = new Date();
         const defaultTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
         setActiveTask(task);
         setNotes(existingLog?.notes || '');
         setTime(existingLog?.time || defaultTime);
@@ -161,18 +120,14 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                         const daysInMonth = new Date(curr.getFullYear(), curr.getMonth() + 1, 0).getDate();
                         const cells = [];
 
-                        // Empty start cells
                         for (let i = 0; i < firstDay; i++) {
                             cells.push(<View key={`empty-${i}`} style={{ width: '14.28%', aspectRatio: 1 }} />);
                         }
 
-                        // Day cells
                         for (let i = 1; i <= daysInMonth; i++) {
                             const dateStr = new Date(curr.getFullYear(), curr.getMonth(), i).toISOString().split('T')[0];
                             const isSelected = dateStr === selectedDate;
-
-                            // Check for tasks on this day
-                            const hasTasks = tasks.some(t => history.some(h => h.date === dateStr));
+                            const hasTasks = history.some(h => h.date === dateStr);
 
                             cells.push(
                                 <TouchableOpacity
@@ -203,7 +158,6 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                                             {i}
                                         </Text>
                                     </View>
-                                    {/* Task Dot */}
                                     {(hasTasks || isSelected) && (
                                         <View style={{
                                             width: 4,
@@ -252,7 +206,7 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                             task={effectiveTask}
                             onToggle={(id) => {
                                 if (isToday) onToggleTask(id);
-                                else openLogModal(task); // Edit log if different day
+                                else openLogModal(task);
                             }}
                             onSetReminder={onSetReminder}
                         />
@@ -260,13 +214,13 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                 })}
                 {tasks.length === 0 && (
                     <View style={{ padding: 20, alignItems: 'center' }}>
-                        <Text style={{ color: theme.colors.textSecondary }}>No tasks for this day</Text>
+                        <Text style={{ color: theme.colors.textSecondary }}>No tasks yet. Tap + Add Task to create one.</Text>
                     </View>
                 )}
                 <View style={{ height: 40 }} />
             </View>
 
-            {/* Log Modal */}
+            {/* ===== Log Task Modal ===== */}
             <Modal
                 visible={modalVisible}
                 transparent
@@ -276,86 +230,87 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                     <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
                         <View style={styles.modalOverlay}>
-                            <View style={[styles.modalContent, {
-                                backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF',
-                        opacity: 1
-                    }]}>
-                        <Text style={[theme.typography.h3, { color: theme.colors.text, marginBottom: 16 }]}>
-                            {activeTask?.title}
-                        </Text>
-
-                        <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginBottom: 8 }]}>Time Completed</Text>
-                        <TouchableOpacity
-                            onPress={() => setShowTimePicker(true)}
-                            style={[styles.inputContainer, { borderColor: theme.colors.border, marginBottom: 16, padding: 12, minHeight: 48, justifyContent: 'center' }]}
-                        >
-                            <Text style={[theme.typography.body, { color: theme.colors.text }]}>
-                                {time || 'Select Time'}
-                            </Text>
-                        </TouchableOpacity>
-
-                        <AppDateTimePicker
-                            value={(() => {
-                                const [h, m] = (time || '12:00').split(':');
-                                const d = new Date();
-                                d.setHours(parseInt(h), parseInt(m));
-                                return d;
-                            })()}
-                            mode="time"
-                            visible={showTimePicker}
-                            onClose={() => setShowTimePicker(false)}
-                            onChange={(event, date) => {
-                                if (date) {
-                                    const h = date.getHours().toString().padStart(2, '0');
-                                    const m = date.getMinutes().toString().padStart(2, '0');
-                                    setTime(`${h}:${m}`);
-                                }
-                                if (Platform.OS !== 'ios') {
-                                    setShowTimePicker(false);
-                                }
-                            }}
-                        />
-
-                        <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginBottom: 8 }]}>Notes (Optional)</Text>
-                        <TextInput
-                            style={[styles.inputContainer, theme.typography.body, {
-                                borderColor: theme.colors.border,
-                                marginBottom: 24,
-                                color: theme.colors.text,
-                                padding: 12,
-                                height: 80,
-                                textAlignVertical: 'top'
-                            }]}
-                            value={notes}
-                            onChangeText={setNotes}
-                            placeholder="Details about the task..."
-                            placeholderTextColor={theme.colors.textSecondary}
-                            multiline
-                        />
-
-                        <View style={{ flexDirection: 'row', gap: 12 }}>
-                            <TouchableOpacity
-                                style={[styles.button, { backgroundColor: theme.colors.background, flex: 1 }]}
-                                onPress={() => setModalVisible(false)}
-                            >
-                                <Text style={[theme.typography.body, { color: theme.colors.text }]}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.button, { backgroundColor: theme.colors.brand.primary, flex: 1 }]}
-                                onPress={handleSaveLog}
-                            >
-                                <Text style={[theme.typography.body, { color: '#fff', fontWeight: 'bold' }]}>
-                                    Complete Task
+                            <View style={[styles.modalContent, { backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF' }]}>
+                                <Text style={[theme.typography.h3, { color: theme.colors.text, marginBottom: 16 }]}>
+                                    {activeTask?.title}
                                 </Text>
-                            </TouchableOpacity>
+
+                                <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginBottom: 8 }]}>
+                                    Time Completed
+                                </Text>
+                                <TouchableOpacity
+                                    onPress={() => setShowTimePicker(true)}
+                                    style={[styles.inputContainer, { borderColor: theme.colors.border, marginBottom: 16, padding: 12, minHeight: 48, justifyContent: 'center' }]}
+                                >
+                                    <Text style={[theme.typography.body, { color: theme.colors.text }]}>
+                                        {time || 'Select Time'}
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <AppDateTimePicker
+                                    value={(() => {
+                                        const [h, m] = (time || '12:00').split(':');
+                                        const d = new Date();
+                                        d.setHours(parseInt(h), parseInt(m));
+                                        return d;
+                                    })()}
+                                    mode="time"
+                                    visible={showTimePicker}
+                                    onClose={() => setShowTimePicker(false)}
+                                    onChange={(event: any, date?: Date) => {
+                                        if (date) {
+                                            const h = date.getHours().toString().padStart(2, '0');
+                                            const m = date.getMinutes().toString().padStart(2, '0');
+                                            setTime(`${h}:${m}`);
+                                        }
+                                        if (Platform.OS !== 'ios') {
+                                            setShowTimePicker(false);
+                                        }
+                                    }}
+                                />
+
+                                <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginBottom: 8 }]}>
+                                    Notes (Optional)
+                                </Text>
+                                <TextInput
+                                    style={[styles.inputContainer, theme.typography.body, {
+                                        borderColor: theme.colors.border,
+                                        marginBottom: 24,
+                                        color: theme.colors.text,
+                                        padding: 12,
+                                        height: 80,
+                                        textAlignVertical: 'top'
+                                    }]}
+                                    value={notes}
+                                    onChangeText={setNotes}
+                                    placeholder="Details about the task..."
+                                    placeholderTextColor={theme.colors.textSecondary}
+                                    multiline
+                                />
+
+                                <View style={{ flexDirection: 'row', gap: 12 }}>
+                                    <TouchableOpacity
+                                        style={[styles.button, { backgroundColor: theme.colors.background, flex: 1 }]}
+                                        onPress={() => setModalVisible(false)}
+                                    >
+                                        <Text style={[theme.typography.body, { color: theme.colors.text }]}>Cancel</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.button, { backgroundColor: theme.colors.brand.primary, flex: 1 }]}
+                                        onPress={handleSaveLog}
+                                    >
+                                        <Text style={[theme.typography.body, { color: '#fff', fontWeight: 'bold' }]}>
+                                            Complete Task
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                         </View>
-                    </View>
-                </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
             </Modal>
 
-            {/* Add Task Modal */}
+            {/* ===== Add Task Modal ===== */}
             <Modal
                 visible={showAddTask}
                 transparent
@@ -365,95 +320,84 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                     <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
                         <View style={styles.modalOverlay}>
-                            <View style={[styles.modalContent, {
-                                backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF',
-                        opacity: 1
-                    }]}>
-                        <Text style={[theme.typography.h3, { color: theme.colors.text, marginBottom: 16 }]}>
-                            New Task
-                        </Text>
+                            <View style={[styles.modalContent, { backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF' }]}>
+                                <Text style={[theme.typography.h3, { color: theme.colors.text, marginBottom: 16 }]}>
+                                    New Task
+                                </Text>
 
-                        <TextInput
-                            style={[
-                                styles.inputContainer,
-                                theme.typography.body,
-                                {
-                                    marginBottom: 20,
-                                    padding: 12,
-                                    color: theme.colors.text,
-                                    borderColor: theme.colors.border
-                                }
-                            ]}
-                            placeholder="What needs to be done?"
-                            placeholderTextColor={theme.colors.textSecondary}
-                            value={newTaskTitle}
-                            onChangeText={setNewTaskTitle}
-                        />
+                                <TextInput
+                                    style={[styles.inputContainer, theme.typography.body, {
+                                        marginBottom: 20,
+                                        padding: 12,
+                                        color: theme.colors.text,
+                                        borderColor: theme.colors.border
+                                    }]}
+                                    placeholder="What needs to be done?"
+                                    placeholderTextColor={theme.colors.textSecondary}
+                                    value={newTaskTitle}
+                                    onChangeText={setNewTaskTitle}
+                                />
 
-                        {/* Frequency Selector */}
-                        <View style={{ marginBottom: 24 }}>
-                            <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginBottom: 8 }]}>
-                                Frequency
-                            </Text>
-                            <View style={{ flexDirection: 'row', gap: 8 }}>
-                                {['Daily', 'Weekly', 'Monthly'].map((freq) => (
+                                <View style={{ marginBottom: 24 }}>
+                                    <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginBottom: 8 }]}>
+                                        Frequency
+                                    </Text>
+                                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                                        {['Daily', 'Weekly', 'Monthly'].map((freq) => (
+                                            <TouchableOpacity
+                                                key={freq}
+                                                onPress={() => setNewTaskFrequency(freq as any)}
+                                                style={{
+                                                    paddingVertical: 8,
+                                                    paddingHorizontal: 16,
+                                                    borderRadius: 20,
+                                                    backgroundColor: newTaskFrequency === freq ? theme.colors.brand.primary : theme.colors.surface,
+                                                    borderWidth: 1,
+                                                    borderColor: newTaskFrequency === freq ? theme.colors.brand.primary : theme.colors.border,
+                                                }}
+                                            >
+                                                <Text style={{
+                                                    color: newTaskFrequency === freq ? '#FFF' : theme.colors.text,
+                                                    fontSize: 13,
+                                                    fontWeight: '500'
+                                                }}>
+                                                    {freq}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </View>
+
+                                <View style={{ flexDirection: 'row', gap: 12 }}>
                                     <TouchableOpacity
-                                        key={freq}
-                                        onPress={() => setNewTaskFrequency(freq as any)}
-                                        style={{
-                                            paddingVertical: 8,
-                                            paddingHorizontal: 16,
-                                            borderRadius: 20,
-                                            backgroundColor: newTaskFrequency === freq ? theme.colors.brand.primary : theme.colors.surface,
-                                            borderWidth: 1,
-                                            borderColor: newTaskFrequency === freq ? theme.colors.brand.primary : theme.colors.border,
-                                        }}
+                                        onPress={() => setShowAddTask(false)}
+                                        style={[styles.button, { backgroundColor: theme.colors.background, flex: 1 }]}
                                     >
-                                        <Text style={{
-                                            color: newTaskFrequency === freq ? '#FFF' : theme.colors.text,
-                                            fontSize: 13,
-                                            fontWeight: '500'
-                                        }}>
-                                            {freq}
-                                        </Text>
+                                        <Text style={{ color: theme.colors.text, fontWeight: '600' }}>Cancel</Text>
                                     </TouchableOpacity>
-                                ))}
+                                    <TouchableOpacity
+                                        onPress={async () => {
+                                            if (!newTaskTitle.trim()) return;
+                                            try {
+                                                await onAddTask({
+                                                    title: newTaskTitle,
+                                                    schedule: newTaskFrequency,
+                                                    dueDate: new Date(selectedDate).getTime(),
+                                                });
+                                                setShowAddTask(false);
+                                                setNewTaskTitle('');
+                                                setNewTaskFrequency('Daily');
+                                            } catch (e) {
+                                                console.error('Add task failed:', e);
+                                            }
+                                        }}
+                                        style={[styles.button, { backgroundColor: theme.colors.brand.primary, flex: 1 }]}
+                                    >
+                                        <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Add Task</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
-
-                        {/* Action Buttons */}
-                        <View style={{ flexDirection: 'row', gap: 12 }}>
-                            <TouchableOpacity
-                                onPress={() => setShowAddTask(false)}
-                                style={[styles.button, { backgroundColor: theme.colors.background, flex: 1 }]}
-                            >
-                                <Text style={{ color: theme.colors.text, fontWeight: '600' }}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={async () => {
-                                    if (!newTaskTitle.trim()) {
-                                        return;
-                                    }
-                                    try {
-                                        await onAddTask({
-                                            title: newTaskTitle,
-                                            schedule: newTaskFrequency,
-                                            dueDate: new Date(selectedDate).getTime(),
-                                        });
-                                        setShowAddTask(false);
-                                        setNewTaskTitle('');
-                                        setNewTaskFrequency('Daily');
-                                    } catch (e) {
-                                        console.error('Add task failed:', e);
-                                    }
-                                }}
-                                style={[styles.button, { backgroundColor: theme.colors.brand.primary, flex: 1 }]}
-                            >
-                                <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Add Task</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
             </Modal>
@@ -471,12 +415,6 @@ const styles = StyleSheet.create({
     },
     taskList: {
         padding: 16,
-    },
-    taskItem: {
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 12,
-        borderWidth: 1,
     },
     modalOverlay: {
         flex: 1,

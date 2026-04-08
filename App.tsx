@@ -23,10 +23,10 @@ SplashScreen.preventAutoHideAsync().catch(() => {
     /* reloading app might cause this to fail, ignore */
 });
 
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any, componentStack: string }> {
     constructor(props: any) {
         super(props);
-        this.state = { hasError: false, error: null };
+        this.state = { hasError: false, error: null, componentStack: '' };
     }
 
     static getDerivedStateFromError(error: any) {
@@ -35,6 +35,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 
     componentDidCatch(error: any, errorInfo: any) {
         console.error('ErrorBoundary caught:', error, errorInfo);
+        this.setState({ componentStack: errorInfo?.componentStack || 'No stack' });
     }
 
     render() {
@@ -43,14 +44,16 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#0F172A' }}>
                     <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#8B5CF6', marginBottom: 20 }}>🦜 BeakBuddy</Text>
                     <Text style={{ fontSize: 18, color: '#EF4444', marginBottom: 10 }}>Something went wrong</Text>
-                    <View style={{ backgroundColor: '#1E293B', padding: 15, borderRadius: 12, width: '100%', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
-                        <Text style={{ fontSize: 14, color: '#F8FAFC', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
+                    <View style={{ backgroundColor: '#1E293B', padding: 15, borderRadius: 12, width: '100%', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 10 }}>
+                        <Text style={{ fontSize: 13, color: '#F8FAFC', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
                             {String(this.state.error)}
                         </Text>
                     </View>
-                    <Text style={{ fontSize: 14, color: '#94A3B8', marginTop: 20, textAlign: 'center' }}>
-                        If you see this on web, try clearing your browser cache or opening in Incognito mode.
-                    </Text>
+                    <View style={{ backgroundColor: '#0F2137', padding: 15, borderRadius: 12, width: '100%', borderWidth: 1, borderColor: 'rgba(255,100,100,0.2)' }}>
+                        <Text style={{ fontSize: 10, color: '#94A3B8', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
+                            {String(this.state.componentStack)}
+                        </Text>
+                    </View>
                 </View>
             );
         }

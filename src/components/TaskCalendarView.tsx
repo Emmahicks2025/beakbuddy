@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { AppDateTimePicker } from './AppDateTimePicker';
 import { CareTask, CareTaskHistory } from '../types';
 // Removed Ionicons for Web compatibility
@@ -273,9 +273,11 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                 animationType="fade"
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, {
-                        backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF',
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
+                        <View style={styles.modalOverlay}>
+                            <View style={[styles.modalContent, {
+                                backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF',
                         opacity: 1
                     }]}>
                         <Text style={[theme.typography.h3, { color: theme.colors.text, marginBottom: 16 }]}>
@@ -349,6 +351,8 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                         </View>
                     </View>
                 </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </Modal>
 
             {/* Add Task Modal */}
@@ -358,9 +362,11 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                 animationType="fade"
                 onRequestClose={() => setShowAddTask(false)}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, {
-                        backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF',
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
+                        <View style={styles.modalOverlay}>
+                            <View style={[styles.modalContent, {
+                                backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF',
                         opacity: 1
                     }]}>
                         <Text style={[theme.typography.h3, { color: theme.colors.text, marginBottom: 16 }]}>
@@ -444,6 +450,8 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                         </View>
                     </View>
                 </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </Modal>
         </View>
     );

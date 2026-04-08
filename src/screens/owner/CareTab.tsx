@@ -219,12 +219,17 @@ const CareTab: React.FC = () => {
 
     const handleAddNewTaskFromCalendar = async (taskData: { title: string, schedule: string, dueDate: number }) => {
         if (!activeProfile) return;
-        await CareTaskRepository.create({
-            profileId: activeProfile.id,
-            title: taskData.title,
-            schedule: taskData.schedule as any,
-        });
-        loadData();
+        try {
+            await CareTaskRepository.create({
+                profileId: activeProfile.id,
+                title: taskData.title,
+                schedule: taskData.schedule as any,
+            });
+            loadData();
+        } catch (e) {
+            console.error('Failed to create task:', e);
+            AlertService.alert('Error', 'Could not save the task. Please try again.');
+        }
     };
 
     const handleLogTask = async (taskId: string, date: string, time: string, notes: string) => {

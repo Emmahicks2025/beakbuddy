@@ -388,7 +388,6 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                             placeholderTextColor={theme.colors.textSecondary}
                             value={newTaskTitle}
                             onChangeText={setNewTaskTitle}
-                            autoFocus
                         />
 
                         {/* Frequency Selector */}
@@ -432,7 +431,10 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={async () => {
-                                    if (newTaskTitle.trim()) {
+                                    if (!newTaskTitle.trim()) {
+                                        return;
+                                    }
+                                    try {
                                         await onAddTask({
                                             title: newTaskTitle,
                                             schedule: newTaskFrequency,
@@ -441,6 +443,8 @@ export const TaskCalendarView: React.FC<TaskCalendarViewProps> = ({ tasks, histo
                                         setShowAddTask(false);
                                         setNewTaskTitle('');
                                         setNewTaskFrequency('Daily');
+                                    } catch (e) {
+                                        console.error('Add task failed:', e);
                                     }
                                 }}
                                 style={[styles.button, { backgroundColor: theme.colors.brand.primary, flex: 1 }]}

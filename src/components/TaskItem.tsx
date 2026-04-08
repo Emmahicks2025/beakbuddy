@@ -103,7 +103,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, on
                                     </View>
                                 )}
 
-                                {task.streak && task.streak > 1 ? (
+                                {!!task.streak && task.streak > 1 ? (
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                         <Text style={{ fontSize: 12 }}>🔥</Text>
                                         <Text style={[theme.typography.caption, { color: theme.colors.brand.primary, fontWeight: 'bold' }]}>

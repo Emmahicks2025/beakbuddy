@@ -24,20 +24,54 @@ export const AppDateTimePicker: React.FC<AppDateTimePickerProps> = ({
 
     if (!visible) return null;
 
-    if (Platform.OS !== 'web') {
+    if (Platform.OS === 'android') {
         return (
             <DateTimePicker
                 value={value}
                 mode={mode}
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display="default"
                 is24Hour={true}
                 onChange={(event: any, date?: Date) => {
                     onChange(event, date);
-                    if (Platform.OS === 'android') {
-                        onClose();
-                    }
+                    onClose();
                 }}
             />
+        );
+    }
+
+    if (Platform.OS === 'ios') {
+        return (
+            <Modal
+                transparent={true}
+                animationType="slide"
+                visible={visible}
+                onRequestClose={onClose}
+            >
+                <TouchableOpacity
+                    style={styles.iosOverlay}
+                    activeOpacity={1}
+                    onPress={onClose}
+                >
+                    <TouchableOpacity activeOpacity={1}>
+                        <View style={[styles.iosPickerContainer, { backgroundColor: theme.isDark ? '#1F2937' : '#FFFFFF', borderTopColor: theme.colors.border }]}>
+                            <View style={[styles.iosHeader, { borderBottomColor: theme.colors.border }]}>
+                                <TouchableOpacity onPress={onClose} style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
+                                    <Text style={[theme.typography.body, { color: theme.colors.brand.primary, fontWeight: 'bold' }]}>Done</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <DateTimePicker
+                                value={value}
+                                mode={mode}
+                                display="spinner"
+                                is24Hour={true}
+                                onChange={onChange}
+                                textColor={theme.isDark ? '#FFFFFF' : '#000000'}
+                                style={{ height: 216, width: Dimensions.get('window').width, alignSelf: 'center' }}
+                            />
+                        </View>
+                    </TouchableOpacity>
+                </TouchableOpacity>
+            </Modal>
         );
     }
 

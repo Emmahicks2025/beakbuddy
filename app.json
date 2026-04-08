@@ -17,7 +17,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.beakbuddy.app",
-      "buildNumber": "51",
+      "buildNumber": "52",
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {

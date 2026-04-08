@@ -4,7 +4,7 @@
  * Update keys in Firebase Console → no app rebuild needed.
  */
 import remoteConfig from '@react-native-firebase/remote-config';
-import { ENV } from './env.generated';
+import { ENV } from '../env.generated';
 
 // Fallback values used if Remote Config fetch fails (e.g. no internet on first launch)
 const DEFAULTS = {

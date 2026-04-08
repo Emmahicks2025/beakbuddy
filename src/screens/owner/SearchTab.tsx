@@ -189,13 +189,13 @@ const SearchTab: React.FC = () => {
                 </View>
             </View>
 
-            {food.notes && (
+            {!!food.notes && (
                 <Text style={[theme.typography.body, { color: theme.colors.text, marginTop: 8 }]}>
                     {food.notes}
                 </Text>
             )}
 
-            {food.symptoms && food.verdict === 'TOXIC' && (
+            {!!food.symptoms && food.verdict === 'TOXIC' && (
                 <View style={[styles.warningBox, { backgroundColor: theme.colors.brand.toxic + '20', borderColor: theme.colors.brand.toxic }]}>
                     <Text style={[theme.typography.bodySmall, { color: theme.colors.brand.toxic, fontWeight: '600' }]}>
                         ⚠️ Symptoms: {food.symptoms}
@@ -203,14 +203,14 @@ const SearchTab: React.FC = () => {
                 </View>
             )}
 
-            {food.servingTips && food.verdict === 'SAFE' && (
+            {!!food.servingTips && food.verdict === 'SAFE' && (
                 <View style={[styles.tipsBox, { backgroundColor: theme.colors.brand.safe + '20', borderColor: theme.colors.brand.safe }]}>
                     <Text style={[theme.typography.bodySmall, { color: theme.colors.brand.safe }]}>
                         💡 {food.servingTips}
                     </Text>
                 </View>
             )}
-            {food.sourceNote && (
+            {!!food.sourceNote && (
                 <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginTop: 8, fontStyle: 'italic' }]}>
                     Source: {food.sourceNote}
                 </Text>

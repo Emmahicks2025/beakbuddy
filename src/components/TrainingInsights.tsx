@@ -182,7 +182,7 @@ export const TrainingInsights: React.FC<TrainingInsightsProps> = ({
                     </View>
                 </View>
 
-                {insights.prediction && (
+                {!!insights.prediction && (
                     <View style={[styles.predictionBox, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                         <Text style={[theme.typography.bodySmall, { color: theme.colors.textSecondary, marginBottom: 4 }]}>
                             📈 Prediction

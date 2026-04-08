@@ -175,7 +175,7 @@ export const LiveSessionTracker: React.FC<LiveSessionTrackerProps> = ({
                 </View>
 
                 {/* Observable Behaviors Checklist */}
-                {observables && observables.length > 0 && (
+                {!!observables && observables.length > 0 && (
                     <ScrollView style={styles.observablesSection} nestedScrollEnabled>
                         <Text style={[theme.typography.body, { color: theme.colors.text, marginBottom: 12, fontWeight: '600' }]}>
                             📝 What Did You Observe?

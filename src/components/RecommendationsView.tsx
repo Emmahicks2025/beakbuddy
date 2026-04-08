@@ -241,7 +241,7 @@ export const RecommendationsView: React.FC<RecommendationsViewProps> = ({
                                         </Text>
 
                                         {/* Action Buttons */}
-                                        {rec.actions && rec.actions.length > 0 && (
+                                        {!!rec.actions && rec.actions.length > 0 && (
                                             <View style={styles.actionsContainer}>
                                                 {rec.actions.map((action, actionIndex) => (
                                                     <TouchableOpacity

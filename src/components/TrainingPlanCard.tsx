@@ -387,7 +387,7 @@ export const TrainingPlanCard: React.FC<TrainingPlanCardProps> = ({
                                                 <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginTop: 2 }]}>
                                                     {new Date(session.date).toLocaleDateString()} • {parseInt((session.minutes as any)?.minutes || session.minutes) || 0} min
                                                 </Text>
-                                                {session.notes && (
+                                                {!!session.notes && (
                                                     <Text style={[theme.typography.caption, { color: theme.colors.textSecondary, marginTop: 4, fontStyle: 'italic' }]} numberOfLines={2}>
                                                         "{session.notes}"
                                                     </Text>
@@ -822,7 +822,7 @@ export const TrainingPlanCard: React.FC<TrainingPlanCardProps> = ({
                                         </Text>
                                     </View>
 
-                                    {selectedSession.notes && (
+                                    {!!selectedSession.notes && (
                                         <View style={[styles.modalSection, { borderColor: theme.colors.border }]}>
                                             <Text style={[theme.typography.bodySmall, { color: theme.colors.textSecondary, fontWeight: '600', marginBottom: 4 }]}>
                                                 Notes
@@ -868,25 +868,25 @@ export const TrainingPlanCard: React.FC<TrainingPlanCardProps> = ({
                                         </View>
                                     )}
 
-                                    {(selectedSession.attempts || selectedSession.successes) && (
+                                    {(!!selectedSession.attempts || !!selectedSession.successes) && (
                                         <View style={[styles.modalSection, { borderColor: theme.colors.border }]}>
                                             <Text style={[theme.typography.bodySmall, { color: theme.colors.textSecondary, fontWeight: '600', marginBottom: 8 }]}>
                                                 Performance
                                             </Text>
                                             <View style={{ flexDirection: 'row', gap: 16 }}>
-                                                {selectedSession.attempts && (
+                                                {!!selectedSession.attempts && (
                                                     <View>
                                                         <Text style={[theme.typography.caption, { color: theme.colors.textSecondary }]}>Attempts</Text>
                                                         <Text style={[theme.typography.body, { color: theme.colors.text }]}>{selectedSession.attempts}</Text>
                                                     </View>
                                                 )}
-                                                {selectedSession.successes && (
+                                                {!!selectedSession.successes && (
                                                     <View>
                                                         <Text style={[theme.typography.caption, { color: theme.colors.textSecondary }]}>Successes</Text>
                                                         <Text style={[theme.typography.body, { color: theme.colors.text }]}>{selectedSession.successes}</Text>
                                                     </View>
                                                 )}
-                                                {selectedSession.successRate && (
+                                                {!!selectedSession.successRate && (
                                                     <View>
                                                         <Text style={[theme.typography.caption, { color: theme.colors.textSecondary }]}>Success Rate</Text>
                                                         <Text style={[theme.typography.body, { color: theme.colors.brand.safe }]}>{selectedSession.successRate}%</Text>

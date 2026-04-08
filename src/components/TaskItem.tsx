@@ -68,7 +68,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, on
                                 backgroundColor: task.isDone ? theme.colors.brand.safe : 'transparent',
                             }
                         ]}>
-                            {task.isDone && <Text style={{ fontSize: 14 }}>✔️</Text>}
+                            {!!task.isDone && <Text style={{ fontSize: 14 }}>✔️</Text>}
                         </View>
 
                         <View style={styles.textContainer}>
@@ -94,7 +94,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, on
                                     </Text>
                                 </View>
 
-                                {task.reminderTime && (
+                                {!!task.reminderTime && (
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                         <Text style={{ fontSize: 10, marginRight: 2 }}>🔔</Text>
                                         <Text style={[theme.typography.caption, { color: theme.colors.textSecondary }]}>

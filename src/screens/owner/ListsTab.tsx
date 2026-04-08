@@ -102,7 +102,7 @@ const ListsTab: React.FC = () => {
                             <FoodVerdictBadge verdict={food.verdict} confidence={food.confidence} />
                         </View>
 
-                        {food.notes && (
+                        {!!food.notes && (
                             <Text style={[theme.typography.bodySmall, { color: theme.colors.textSecondary, marginTop: 8 }]} numberOfLines={2}>
                                 {food.notes}
                             </Text>

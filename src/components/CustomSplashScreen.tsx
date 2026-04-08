@@ -239,7 +239,7 @@ export const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({ isReady,
             </Animated.View>
 
             {/* Version Footer */}
-            <Text style={styles.versionText}>v{require('../../package.json').version} • UI REFRESH V2 • Safe & Secure</Text>
+            <Text style={styles.versionText}>{'v' + (require('../../package.json').version || '') + ' \u2022 Safe \u0026 Secure'}</Text>
         </View>
     );
 };

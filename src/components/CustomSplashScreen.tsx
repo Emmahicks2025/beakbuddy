@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, Animated, Dimensions, Platform } from 'r
 import * as SplashScreen from 'expo-splash-screen';
 import { useTheme } from '../theme/ThemeContext';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const TIPS = [
     "Parrots are as smart as 5-year-old children!",
@@ -73,7 +73,7 @@ export const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({ isReady,
             ])
         ]).start();
 
-        // Continuous Logo Pulse & Glow Rotation
+        // Continuous Logo Pulse and Glow Rotation
         Animated.parallel([
             Animated.loop(
                 Animated.sequence([
@@ -165,6 +165,15 @@ export const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({ isReady,
         outputRange: ['0%', '100%'],
     });
 
+    const progressRounded = Math.round(progress);
+    const loadingLabel = progress >= 90 && !isReady
+        ? 'Finalizing configuration...'
+        : progress < 40
+            ? 'Initializing Engine'
+            : progress < 80
+                ? 'Optimizing AI'
+                : 'Securing Data';
+
     return (
         <View style={styles.container}>
             {/* Base Native Image */}
@@ -217,12 +226,8 @@ export const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({ isReady,
                 {/* Loading System */}
                 <Animated.View style={[styles.loadingContainer, { opacity: loadingOpacity }]}>
                     <View style={styles.progressInfo}>
-                        <Text style={styles.loadingStatus}>
-                            {progress >= 90 && !isReady
-                                ? 'Finalizing configuration...'
-                                : progress < 40 ? 'Initializing Engine' : progress < 80 ? 'Optimizing AI' : 'Securing Data'}
-                        </Text>
-                        <Text style={styles.percentage}>{Math.round(progress)}%</Text>
+                        <Text style={styles.loadingStatus}>{loadingLabel}</Text>
+                        <Text style={styles.percentage}>{String(progressRounded) + '%'}</Text>
                     </View>
 
                     <View style={styles.loadingBarTrack}>
@@ -239,7 +244,7 @@ export const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({ isReady,
             </Animated.View>
 
             {/* Version Footer */}
-            <Text style={styles.versionText}>{'v' + (require('../../package.json').version || '') + ' \u2022 Safe \u0026 Secure'}</Text>
+            <Text style={styles.versionText}>BeakBuddy v1.2.9</Text>
         </View>
     );
 };
@@ -273,8 +278,8 @@ const styles = StyleSheet.create({
         borderStyle: 'dashed',
     },
     logoContainer: {
-        width: width * 0.5, // Allow more space for wide logo
-        aspectRatio: 1080 / 589, // Match the logo asset exactly
+        width: width * 0.5,
+        aspectRatio: 1080 / 589,
         marginBottom: 32,
         alignItems: 'center',
         justifyContent: 'center',
@@ -284,7 +289,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     appName: {
-        fontSize: 52, // Match StartScreen
+        fontSize: 52,
         fontWeight: '900',
         color: '#FFFFFF',
         letterSpacing: -1,
@@ -295,12 +300,12 @@ const styles = StyleSheet.create({
         textShadowRadius: 20,
     },
     tagline: {
-        fontSize: 16, // Slightly larger
+        fontSize: 16,
         fontWeight: '700',
         color: '#8B5CF6',
         letterSpacing: 3,
         textTransform: 'uppercase',
-        marginBottom: 60, // Move up
+        marginBottom: 60,
         textAlign: 'center',
         opacity: 0.9,
     },
@@ -382,4 +387,3 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
 });
-

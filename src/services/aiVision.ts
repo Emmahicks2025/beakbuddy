@@ -56,7 +56,7 @@ export async function analyzeFoodImage(
         }
         `;
 
-        const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+        const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
         let lastError = "";
 
         for (const apiKey of keys) {
@@ -184,8 +184,8 @@ export async function analyzeFoodText(
         }
         `;
 
-        // Using gemini-1.5-flash for text analysis (v1 endpoint)
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // Using gemini-2.5-flash for text analysis
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

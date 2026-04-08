@@ -61,7 +61,7 @@ Respond concisely and helpfuly.
     `;
 
     // Resilient model fallback loop
-    const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+    const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
     let lastError = "";
 
     for (const model of models) {

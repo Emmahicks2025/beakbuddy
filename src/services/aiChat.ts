@@ -60,45 +60,45 @@ ${userQuery}
 Respond concisely and helpfuly.
     `;
 
-    // Use the verified available model from API test
-    const model = 'gemini-2.0-flash';
+    // Resilient model fallback loop
+    const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+    let lastError = "";
 
-    try {
-        const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+    for (const model of models) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: unifiedPrompt }] }],
-                generationConfig: { temperature: 0.7, maxOutputTokens: 512 }
-            })
-        });
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: unifiedPrompt }] }],
+                    generationConfig: { temperature: 0.7, maxOutputTokens: 512 }
+                })
+            });
 
-        if (response.ok) {
-            const data = await response.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) return text;
+            if (response.ok) {
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) return text;
+            }
+
+            // Handle specific API errors for this model
+            const err = await response.json().catch(() => ({}));
+            lastError = err.error?.message || 'Unknown API Error';
+            console.warn(`AI Chat Attempt [${model}] failed:`, lastError);
+
+            if (response.status === 403 || lastError.includes('key')) {
+                return "⚠️ Access Denied: The API Key is invalid or restricted.";
+            }
+
+        } catch (e: any) {
+            lastError = e.message || "Network request failed";
+            console.error(`AI Chat Network Error [${model}]:`, lastError);
         }
-
-        // Handle specific API errors
-        const err = await response.json().catch(() => ({}));
-        const errorMessage = err.error?.message || 'Unknown API Error';
-
-        console.error(`AI Chat Error [${model}]:`, errorMessage);
-
-        if (response.status === 403 || errorMessage.includes('key')) {
-            return "⚠️ Access Denied: The API Key is invalid or expired.";
-        } else if (response.status === 429) {
-            return "⏳ High Traffic: Please wait a moment and try again.";
-        }
-
-        return `⚠️ Assistant Error (${response.status}): ${errorMessage}`;
-
-    } catch (e: any) {
-        console.error("AI Network Error:", e);
-        return `❌ Connection Failed: ${e.message || "Check your internet connection."}`;
     }
+
+    return `❌ Assistant Error: All models failed. Last error: ${lastError}`;
 }
 
 function buildSystemPrompt(context: AppContext): string {

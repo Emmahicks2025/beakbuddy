@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, RefreshControl, Alert, Modal, Platform, Image, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, RefreshControl, Alert, Modal, Platform, Image, SafeAreaView, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
@@ -692,8 +692,10 @@ const CareTab: React.FC = () => {
                 visible={activeModal === 'meal'}
                 onRequestClose={() => setActiveModal(null)}
             >
-                <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 }]}>
-                    <Card>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
+                        <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 }]}>
+                            <Card>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                             <Text style={theme.typography.h2}>Log Meal</Text>
                             <TouchableOpacity onPress={() => setActiveModal(null)}>
@@ -719,9 +721,11 @@ const CareTab: React.FC = () => {
                             placeholderTextColor={theme.colors.textSecondary}
                         />
 
-                        <Button title="Save Log" onPress={handleLogMeal} />
-                    </Card>
-                </View>
+                            <Button title="Save Log" onPress={handleLogMeal} />
+                        </Card>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
             </Modal>
 
             {/* Task Form Modal */}
@@ -731,8 +735,10 @@ const CareTab: React.FC = () => {
                 visible={activeModal === 'task_form'}
                 onRequestClose={() => setActiveModal(null)}
             >
-                <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 }]}>
-                    <Card>
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                    <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} keyboardShouldPersistTaps="handled">
+                        <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 }]}>
+                            <Card>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                             <Text style={theme.typography.h2}>Add Task</Text>
                             <TouchableOpacity onPress={() => setActiveModal(null)}>
@@ -765,9 +771,11 @@ const CareTab: React.FC = () => {
                             ))}
                         </View>
 
-                        <Button title="Create Task" onPress={handleAddTask} />
-                    </Card>
-                </View>
+                            <Button title="Create Task" onPress={handleAddTask} />
+                        </Card>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
             </Modal>
 
         </View>

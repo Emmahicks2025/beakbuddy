@@ -247,6 +247,20 @@ const WebTimePicker: React.FC<{ value: Date; onSelect: (date: Date) => void; the
 };
 
 const styles = StyleSheet.create({
+    iosOverlay: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    iosPickerContainer: {
+        borderTopWidth: 1,
+        paddingBottom: 20,
+    },
+    iosHeader: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        borderBottomWidth: 1,
+    },
     webOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.4)',

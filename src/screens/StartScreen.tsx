@@ -25,7 +25,7 @@ const GoogleIcon = () => (
 
 const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
     const { theme } = useTheme();
-    const { loginWithGoogle } = useAuth();
+    const { loginWithGoogle, loginWithApple } = useAuth();
     const insets = useSafeAreaInsets();
     const [showEmailModal, setShowEmailModal] = useState(false);
 
@@ -76,6 +76,14 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
             await loginWithGoogle();
         } catch (error) {
             console.error('Google login error:', error);
+        }
+    };
+
+    const handleAppleLogin = async () => {
+        try {
+            await loginWithApple();
+        } catch (error) {
+            console.error('Apple login error:', error);
         }
     };
 
@@ -165,6 +173,19 @@ const StartScreen: React.FC<StartScreenProps> = ({ navigation }) => {
                             <Text style={styles.buttonText}>Get Started with Google</Text>
                         </View>
                     </TouchableOpacity>
+                    
+                    {Platform.OS === 'ios' && (
+                        <TouchableOpacity
+                            style={[styles.primaryButton, { marginTop: 12 }]}
+                            onPress={handleAppleLogin}
+                            activeOpacity={0.85}
+                        >
+                            <View style={styles.buttonContent}>
+                                <Ionicons name="logo-apple" size={24} color="#000" style={{ marginRight: 12 }} />
+                                <Text style={styles.buttonText}>Continue with Apple</Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
 
                     <TouchableOpacity
                         style={[styles.primaryButton, styles.emailButton]}

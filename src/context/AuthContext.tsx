@@ -2,7 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import auth, { GoogleAuthProvider } from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { Config } from '../config';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -150,9 +151,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const loginWithApple = async () => {
-        console.log("Apple Login not yet implemented");
-        // TODO: Implement Apple Sign-In
-        throw new Error("Apple Sign-In not implemented");
+        try {
+            if (Platform.OS !== 'ios') {
+                Alert.alert('Not Supported', 'Apple Sign-In is only available on iOS devices.');
+                return;
+            }
+
+            console.error('🔵 Authenticating with Apple...');
+
+            const appleAuthRequestResponse = await AppleAuthentication.signInAsync({
+                requestedScopes: [
+                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                ],
+            });
+
+            const { identityToken } = appleAuthRequestResponse;
+
+            if (!identityToken) {
+                throw new Error('Apple Sign-In failed: No identity token received');
+            }
+
+            // Create a Firebase credential with the token
+            const appleCredential = auth.AppleAuthProvider.credential(identityToken);
+
+            // Sign in with the credential
+            const userCredential = await auth().signInWithCredential(appleCredential);
+            console.error('✅ Firebase Apple sign-in successful:', userCredential.user.email);
+
+            setUser({
+                uid: userCredential.user.uid,
+                email: userCredential.user.email,
+                displayName: userCredential.user.displayName
+            });
+
+            Alert.alert('Success', `Welcome ${userCredential.user.displayName || userCredential.user.email}!`);
+        } catch (error: any) {
+            console.error('❌ Apple Sign-In Error:', error);
+            if (error.code === 'ERR_CANCELED' || error.code === 'ERR_REQUEST_CANCELED') {
+                console.log('User cancelled Apple Sign-In');
+            } else {
+                Alert.alert(
+                    'Sign-In Failed',
+                    `Unable to sign in with Apple: ${error.message}`
+                );
+            }
+            throw error;
+        }
     };
 
     const logout = async () => {

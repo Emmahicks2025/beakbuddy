@@ -17,7 +17,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.beakbuddy.app",
-      "buildNumber": "57",
+      "buildNumber": "58",
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
@@ -59,7 +59,8 @@
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       "@react-native-google-signin/google-signin",
-      "react-native-iap"
+      "react-native-iap",
+      "expo-apple-authentication"
     ],
     "extra": {
       "eas": {
